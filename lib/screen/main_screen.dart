@@ -14,6 +14,9 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+
+  var _selectedIndex = 0;
+
   final List<BottomIndicatorNavigationBarItem> items = [
     BottomIndicatorNavigationBarItem(
       icon: 'assets/icons/black/custom.house.fill.2.svg',
@@ -41,19 +44,32 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Indicator Bottom Bar"),
         backgroundColor: Colors.black87,
       ),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[],
-        ),
+      body: IndexedStack(
+        index: _selectedIndex ,
+        children: [
+          Container(
+            color: Colors.amber,
+          ),
+          Container(
+            color: Colors.red,
+          ),
+          NoticeScreen(),
+          MyPageScreen()
+        ],
       ),
       bottomNavigationBar: BottomIndicatorBar(
-        onTap: (index) => print("Selected Index: $index"),
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        currentIndex: _selectedIndex,
         items: items,
         iconSize: 30.0,
         barHeight: 70.0,
@@ -65,3 +81,5 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 }
+
+
