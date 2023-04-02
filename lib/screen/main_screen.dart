@@ -56,9 +56,7 @@ class _MainScreenState extends State<MainScreen> {
           Container(
             color: Colors.amber,
           ),
-          Container(
-            color: Colors.red,
-          ),
+          ReportScreen(),
           NoticeScreen(),
           MyPageScreen()
         ],
