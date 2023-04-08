@@ -43,6 +43,10 @@ dependencies:
   font_awesome_flutter: ^10.4.0
   flutter_svg: ^1.1.6
   bottom_indicator_bar_svg: ^2.1.5
+  flutter_native_splash: ^2.2.18
+
+flutter_native_splash:
+  color: "#497AA6"
 
 dev_dependencies:
   flutter_test:
@@ -70,6 +74,7 @@ flutter:
   assets:
     - assets/icons/black/
     - assets/icons/blue/
+    - assets/icons/white/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -14,7 +14,6 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-
   var _selectedIndex = 0;
 
   final List<BottomIndicatorNavigationBarItem> items = [
@@ -44,18 +43,11 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Indicator Bottom Bar"),
-        backgroundColor: Colors.black87,
-      ),
       body: IndexedStack(
-        index: _selectedIndex ,
+        index: _selectedIndex,
         children: [
-          Container(
-            color: Colors.amber,
-          ),
+          HomeScreen(),
           ReportScreen(),
           NoticeScreen(),
           MyPageScreen()
@@ -79,5 +71,3 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 }
-
-
