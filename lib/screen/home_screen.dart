@@ -90,7 +90,7 @@ class HomeScreen extends StatelessWidget {
                                     Offset(0, 8), // changes position of shadow
                               ),
                             ]),
-                        height: MediaQuery.of(context).size.height * 0.6,
+                        height: MediaQuery.of(context).size.height * 0.65,
                         width: double.infinity,
                         child: ListView.separated(
                           itemCount: 10,
@@ -123,15 +123,18 @@ class HomeScreen extends StatelessWidget {
                                     Offset(0, 8), // changes position of shadow
                               ),
                             ]),
-                        height: MediaQuery.of(context).size.height * 0.3,
+                        height: MediaQuery.of(context).size.height * 0.25,
                         width: double.infinity,
                         child: Column(
                           children: [
-                            Text(
-                              textAlign: TextAlign.left,
-                              "주차정보",
-                              style: TextStyle(
-                                color: Colors.white,
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                textAlign: TextAlign.left,
+                                "주차정보",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                             Row(
