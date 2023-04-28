@@ -11,9 +11,12 @@ class SignUpUserScreen extends StatefulWidget {
 
 class _SignUpUserScreen extends State<SignUpUserScreen> {
   var id = "";
+  var email = "";
   var pass = "";
   var s_number;
   var u_name;
+  var phone_num;
+  var address;
   var isChecked = [false, false, false, false];
 
   @override
@@ -23,24 +26,24 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
       body: Center(
         child: FractionallySizedBox(
           widthFactor: 0.95,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.8,
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: Colors.white),
-                      borderRadius: BorderRadius.circular(20.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.2),
-                          spreadRadius: 5,
-                          blurRadius: 7,
-                          offset: Offset(0, 8), // changes position of shadow
-                        ),
-                      ]),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                height: MediaQuery.of(context).size.height * 0.8,
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: Colors.white),
+                    borderRadius: BorderRadius.circular(20.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 5,
+                        blurRadius: 7,
+                        offset: Offset(0, 8), // changes position of shadow
+                      ),
+                    ]),
+                child: SingleChildScrollView(
                   child: Column(
                     children: [
                       Padding(
@@ -70,28 +73,6 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                 TextField(
                                   onChanged: (text) {
                                     setState(() {
-                                      id = text;
-                                    });
-                                  },
-                                  //아이디가 입력되는 칸
-                                  decoration: InputDecoration(labelText: '이메일'),
-                                  keyboardType: TextInputType.emailAddress,
-                                ),
-                                TextField(
-                                  onChanged: (text) {
-                                    setState(() {
-                                      pass = text;
-                                    });
-                                  },
-                                  //비밀번호가 입력되는 칸
-                                  decoration:
-                                      InputDecoration(labelText: '비밀번호'),
-                                  keyboardType: TextInputType.text,
-                                  obscureText: true,
-                                ),
-                                TextField(
-                                  onChanged: (text) {
-                                    setState(() {
                                       s_number = text;
                                     });
                                   },
@@ -108,6 +89,49 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                   //이름 입력되는 칸
                                   decoration: InputDecoration(labelText: '이름'),
                                   keyboardType: TextInputType.text,
+                                ),
+                                TextField(
+                                  onChanged: (text) {
+                                    setState(() {
+                                      id = text;
+                                    });
+                                  },
+                                  //아이디가 입력되는 칸
+                                  decoration: InputDecoration(labelText: '아이디'),
+                                  keyboardType: TextInputType.text,
+                                ),
+                                TextField(
+                                  onChanged: (text) {
+                                    setState(() {
+                                      pass = text;
+                                    });
+                                  },
+                                  //비밀번호가 입력되는 칸
+                                  decoration:
+                                      InputDecoration(labelText: '비밀번호'),
+                                  keyboardType: TextInputType.text,
+                                  obscureText: true,
+                                ),
+                                TextField(
+                                  onChanged: (text) {
+                                    setState(() {
+                                      id = text;
+                                    });
+                                  },
+                                  //전화번호 입력되는 칸
+                                  decoration:
+                                      InputDecoration(labelText: '전화번호'),
+                                  keyboardType: TextInputType.phone,
+                                ),
+                                TextField(
+                                  onChanged: (text) {
+                                    setState(() {
+                                      email = text;
+                                    });
+                                  },
+                                  //이메일 입력되는 칸
+                                  decoration: InputDecoration(labelText: '이메일'),
+                                  keyboardType: TextInputType.emailAddress,
                                 ),
                                 Row(
                                   children: [
@@ -194,7 +218,7 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                         // 뒤로 버튼
                                         minWidth: 100.0,
                                         height: 50.0,
-                                        child: ElevatedButton(
+                                        child: OutlinedButton(
                                             style: ButtonStyle(
                                                 textStyle: MaterialStateProperty
                                                     .all(const TextStyle(
@@ -218,8 +242,8 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

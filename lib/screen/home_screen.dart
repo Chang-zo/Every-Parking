@@ -1,11 +1,18 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+import 'package:every_parking/parking_lot_map.dart';
 
 //로그인 후 보이는 첫화면
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
+  @override
+  State<HomeScreen> createState() => _HomeScreen();
+}
 
+class _HomeScreen extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,7 +47,7 @@ class HomeScreen extends StatelessWidget {
               ),
               //알림창
               Container(
-                height: MediaQuery.of(context).size.height * 0.06,
+                height: 40,
                 decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border.all(color: Colors.white),
@@ -53,20 +60,23 @@ class HomeScreen extends StatelessWidget {
                         offset: Offset(0, 8), // changes position of shadow
                       ),
                     ]),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    SvgPicture.asset(
-                      'assets/icons/black/custom.bell.svg',
-                      width: 25,
-                      height: 25,
-                    ),
-                    Text(
-                      " 알람읽으시게~",
-                      style: TextStyle(fontSize: 15),
-                      maxLines: 2,
-                    )
-                  ],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/icons/black/custom.bell.svg',
+                        width: 20,
+                        height: 20,
+                      ),
+                      Text(
+                        " 알람읽으시게~",
+                        style: TextStyle(fontSize: 15),
+                        maxLines: 2,
+                      )
+                    ],
+                  ),
                 ),
               ),
               //주차정보
@@ -92,18 +102,63 @@ class HomeScreen extends StatelessWidget {
                             ]),
                         height: MediaQuery.of(context).size.height * 0.65,
                         width: double.infinity,
-                        child: ListView.separated(
-                          itemCount: 10,
-                          separatorBuilder: (BuildContext context, int index) =>
-                              Divider(
-                            color: Colors.grey,
-                            thickness: 1.0,
+                        child: Container(
+                          padding: EdgeInsets.only(
+                              top: MediaQuery.of(context).size.height * 0.22),
+                          child: ListView.builder(
+                            itemCount: _items.length,
+                            itemBuilder: (context, index) {
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => ParkingMap()),
+                                  );
+                                },
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 5.0),
+                                  child: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: <Widget>[
+                                      Text(_items[index].title),
+                                      Container(
+                                        margin:
+                                            EdgeInsets.symmetric(vertical: 5),
+                                        width: 300,
+                                        height: 20,
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(10)),
+                                          child: LinearProgressIndicator(
+                                            value:
+                                                (_items[index].usedParkingCell /
+                                                    _items[index]
+                                                        .amountParkingCell),
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    Color(0xff00ff00)),
+                                            backgroundColor: Color(0xffD6D6D6),
+                                          ),
+                                        ),
+                                      ),
+                                      Text(_items[index]
+                                              .usedParkingCell
+                                              .toString() +
+                                          "/" +
+                                          _items[index]
+                                              .amountParkingCell
+                                              .toString()),
+                                      Text(_items[index].subtitle),
+                                      Divider(),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                          itemBuilder: (BuildContext context, int index) {
-                            return ListTile(
-                              title: Text('Item ${index + 1}'),
-                            );
-                          },
                         )),
                     // 상단 고정 컨테이너
                     Positioned(
@@ -125,23 +180,36 @@ class HomeScreen extends StatelessWidget {
                             ]),
                         height: MediaQuery.of(context).size.height * 0.25,
                         width: double.infinity,
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                textAlign: TextAlign.left,
-                                "주차정보",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 15.0, vertical: 10),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 10.0),
+                                    child: Text(
+                                      textAlign: TextAlign.left,
+                                      "주차정보",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            Row(
-                              children: [
-                                Flexible(
-                                  flex: 2,
-                                  child: Container(
+                              //주차 정보 안에 하햔 네모네모들
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Container(
+                                    width: 150,
+                                    height: 80,
                                     decoration: BoxDecoration(
                                         color: Colors.white,
                                         border: Border.all(color: Colors.white),
@@ -157,20 +225,23 @@ class HomeScreen extends StatelessWidget {
                                           ),
                                         ]),
                                     child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Text("자리번호"),
                                         Divider(
                                           color: Colors.grey,
-                                          thickness: 1.0,
+                                          thickness: 1,
+                                          indent: 10,
+                                          endIndent: 10,
                                         ),
                                         Text("차량번호")
                                       ],
                                     ),
                                   ),
-                                ),
-                                Flexible(
-                                  flex: 2,
-                                  child: Container(
+                                  Container(
+                                    width: 150,
+                                    height: 80,
                                     decoration: BoxDecoration(
                                         color: Colors.white,
                                         border: Border.all(color: Colors.white),
@@ -189,7 +260,7 @@ class HomeScreen extends StatelessWidget {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        Text("잔여시간"),
+                                        Text("잔여\n시간"),
                                         VerticalDivider(
                                           color: Colors.grey,
                                           thickness: 1,
@@ -201,10 +272,68 @@ class HomeScreen extends StatelessWidget {
                                       ],
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  SizedBox(
+                                    width: 150,
+                                    height: 35,
+                                    child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Color.fromARGB(
+                                              0xFF, 0x2F, 0x64, 0x96),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(30.0),
+                                          ),
+                                        ),
+                                        onPressed: () {},
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceAround,
+                                          children: [
+                                            SvgPicture.asset(
+                                              'assets/icons/white/custom.plus.app.svg',
+                                              width: 20,
+                                              height: 20,
+                                            ),
+                                            Text("시간연장")
+                                          ],
+                                        )),
+                                  ),
+                                  SizedBox(
+                                    width: 150,
+                                    height: 35,
+                                    child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Color.fromARGB(
+                                              0xFF, 0x2F, 0x64, 0x96),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(30.0),
+                                          ),
+                                        ),
+                                        onPressed: () {},
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceAround,
+                                          children: [
+                                            SvgPicture.asset(
+                                              'assets/icons/white/custom.return.right.svg',
+                                              width: 20,
+                                              height: 20,
+                                            ),
+                                            Text("반납")
+                                          ],
+                                        )),
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -218,3 +347,30 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
+
+class ListItem {
+  final String title;
+  final String subtitle;
+  final num amountParkingCell;
+  final num usedParkingCell;
+
+  ListItem(
+      {required this.title,
+      required this.subtitle,
+      required this.amountParkingCell,
+      required this.usedParkingCell});
+}
+
+List<ListItem> _items = [
+  ListItem(
+      title: "동문 주차장",
+      subtitle: "계명대학교",
+      amountParkingCell: 95,
+      usedParkingCell: 20),
+  ListItem(
+      title: "남문 주차장",
+      subtitle: "계명대학교",
+      amountParkingCell: 100,
+      usedParkingCell: 13),
+  // ...
+];

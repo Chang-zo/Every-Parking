@@ -97,7 +97,7 @@ class _LogInState extends State<LoginScreen> {
                                   children: [
                                     ButtonTheme(
                                         // 로그인 버튼
-                                        minWidth: 100.0,
+                                        minWidth: 150.0,
                                         height: 50.0,
                                         child: ElevatedButton(
                                             style: ButtonStyle(
@@ -160,7 +160,7 @@ class _LogInState extends State<LoginScreen> {
                                     ),
                                     ButtonTheme(
                                         // 회원가입 버튼
-                                        minWidth: 100.0,
+                                        minWidth: 150.0,
                                         height: 50.0,
                                         child: ElevatedButton(
                                             style: ButtonStyle(
