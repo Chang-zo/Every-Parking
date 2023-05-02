@@ -5,7 +5,10 @@ import 'package:every_parking/Model/user.dart';
 import 'package:every_parking/screen/parking_lot_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:every_parking/parking_lot_map.dart';
+import 'package:every_parking/screen/parking_lot_map.dart';
+
+import '../Model/parkingLotInfo.dart';
+import '../Model/parkingstatus.dart';
 
 //로그인 후 보이는 첫화면
 class HomeScreen extends StatefulWidget {
@@ -16,15 +19,22 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreen extends State<HomeScreen> {
-
   var ds = new Datasource();
-  late var myParkingStatus;
   var user = new User();
-  var nowparkingList;
+  var myParkingStatus = new MyParkingStatus();
+  late List<ParkingLotInfo> nowParkingList;
 
+  @override
   void initState() {
     super.initState();
     _getUserInfo();
+    //_getUserCarInfo();
+    //_getParkingLotInfo();
+    nowParkingList = [
+      ParkingLotInfo(name: "동문주차장", available: 15, total: 19),
+      ParkingLotInfo(name: "동문주차장", available: 15, total: 19),
+      ParkingLotInfo(name: "동문주차장", available: 15, total: 19),
+    ];
   }
 
   /* 유저 가져오기 */
@@ -34,6 +44,28 @@ class _HomeScreen extends State<HomeScreen> {
     setState(() {
       user.studentName = userInfo.studentName;
       user.status = userInfo.status;
+    });
+  }
+
+  /*내 자동차 정보 가져오기*/
+  void _getUserCarInfo() async {
+    MyParkingStatus myParkingStatusInfo =
+        await ds.myParkingStatus(widget.userId);
+
+    setState(() {
+      myParkingStatus.parkingId = myParkingStatusInfo.parkingId;
+      myParkingStatus.remain = myParkingStatusInfo.remain;
+      myParkingStatus.carNumber = myParkingStatusInfo.carNumber;
+    });
+  }
+
+  /*주차장 상태 가져오기*/
+  void _getParkingLotInfo() async {
+    List<ParkingLotInfo> nowParkingStatusInfo =
+        await ds.nowParking(widget.userId);
+
+    setState(() {
+      nowParkingList = nowParkingStatusInfo;
     });
   }
 
@@ -56,7 +88,7 @@ class _HomeScreen extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '${user.studentName} 님 \n 어서오세요!',
+                        '${user.studentName}님 \n어서오세요!',
                         style: TextStyle(fontSize: 20),
                         maxLines: 2,
                       ),
@@ -130,14 +162,15 @@ class _HomeScreen extends State<HomeScreen> {
                           padding: EdgeInsets.only(
                               top: MediaQuery.of(context).size.height * 0.22),
                           child: ListView.builder(
-                            itemCount: _items.length,
+                            itemCount: nowParkingList.length,
                             itemBuilder: (context, index) {
                               return GestureDetector(
                                 onTap: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => ParkingMap()),
+                                        builder: (context) => ParkingMap(
+                                            nowParkingList[index].name)),
                                   );
                                 },
                                 child: Padding(
@@ -147,7 +180,7 @@ class _HomeScreen extends State<HomeScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
-                                      Text(_items[index].title),
+                                      Text(nowParkingList[index].name),
                                       Container(
                                         margin:
                                             EdgeInsets.symmetric(vertical: 5),
@@ -157,10 +190,11 @@ class _HomeScreen extends State<HomeScreen> {
                                           borderRadius: BorderRadius.all(
                                               Radius.circular(10)),
                                           child: LinearProgressIndicator(
-                                            value:
-                                                (_items[index].usedParkingCell /
-                                                    _items[index]
-                                                        .amountParkingCell),
+                                            value: ((nowParkingList[index]
+                                                        .total -
+                                                    nowParkingList[index]
+                                                        .available) /
+                                                nowParkingList[index].total),
                                             valueColor:
                                                 AlwaysStoppedAnimation<Color>(
                                                     Color(0xff00ff00)),
@@ -168,14 +202,14 @@ class _HomeScreen extends State<HomeScreen> {
                                           ),
                                         ),
                                       ),
-                                      Text(_items[index]
-                                              .usedParkingCell
+                                      Text((nowParkingList[index].total -
+                                                  nowParkingList[index]
+                                                      .available)
                                               .toString() +
                                           "/" +
-                                          _items[index]
-                                              .amountParkingCell
+                                          nowParkingList[index]
+                                              .total
                                               .toString()),
-                                      Text(_items[index].subtitle),
                                       Divider(),
                                     ],
                                   ),
@@ -371,30 +405,3 @@ class _HomeScreen extends State<HomeScreen> {
     );
   }
 }
-
-class ListItem {
-  final String title;
-  final String subtitle;
-  final num amountParkingCell;
-  final num usedParkingCell;
-
-  ListItem(
-      {required this.title,
-      required this.subtitle,
-      required this.amountParkingCell,
-      required this.usedParkingCell});
-}
-
-List<ListItem> _items = [
-  ListItem(
-      title: "동문 주차장",
-      subtitle: "계명대학교",
-      amountParkingCell: 95,
-      usedParkingCell: 20),
-  ListItem(
-      title: "남문 주차장",
-      subtitle: "계명대학교",
-      amountParkingCell: 100,
-      usedParkingCell: 13),
-  // ...
-];

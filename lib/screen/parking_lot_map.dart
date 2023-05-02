@@ -3,23 +3,21 @@ import 'dart:convert';
 import '';
 
 class ParkingMap extends StatefulWidget {
-  const ParkingMap({Key? key}) : super(key: key);
+  var name;
+
+  ParkingMap(this.name, {Key? key}) : super(key: key);
 
   @override
   State<ParkingMap> createState() => _ParkingMapState();
 }
 
 class _ParkingMapState extends State<ParkingMap> {
-  /*var noParking = [12, 14, 15, 17, 54, 59, 96, 98, 99, 101];
-  var road = [2, 3, 8, 9, 104, 105, 110, 111];
-  var using = [];*/
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           title: Text(
-            "동문주차장",
+            widget.name,
             style: TextStyle(color: Colors.white),
           ),
           backgroundColor: Color.fromARGB(0xff, 0x49, 0x7a, 0xa6),
