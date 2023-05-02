@@ -1,6 +1,8 @@
+import 'package:every_parking/datasource/APIUrl.dart';
 import 'package:flutter/material.dart';
 import 'package:every_parking/screen/sign_up_screen.dart';
 
+import '../datasource/datasource.dart';
 import 'main_screen.dart';
 
 //로그 인 후에는 앱 켤떄 안보이게 하기
@@ -13,8 +15,8 @@ class LoginScreen extends StatefulWidget {
 class _LogInState extends State<LoginScreen> {
   var id = "";
   var pass = "";
-  var testId = "id";
-  var testPass = "pass";
+
+  var datasource = new Datasource();
 
   @override
   Widget build(BuildContext context) {
@@ -112,20 +114,23 @@ class _LogInState extends State<LoginScreen> {
                                                         Color.fromARGB(0xff,
                                                             0x49, 0x7a, 0xa6))),
                                             child: const Text("Log in"),
-                                            onPressed: () {
+                                            onPressed: () async {
                                               //로그인 버튼을 눌렀을 때 작동될 코드
                                               //정보가 맞다면
                                               //홈 화면으로 이동
                                               //정보가 틀리다면
                                               //틀렸다고 팝업 띄우기
-                                              if (id == testId ||
-                                                  pass == testPass) {
+                                              /* 서버와 로그인 통신 .. 성공 -> true / 실패 -> false */
+                                              bool check = await datasource.loginUser(id, pass);
+                                              print(check);
+
+                                              if (check) {
                                                 Navigator.pushReplacement(
                                                     context,
                                                     MaterialPageRoute(
                                                         builder: (BuildContext
                                                                 context) =>
-                                                            MainScreen()));
+                                                            MainScreen(userId: id,)));
                                               } else {
                                                 showDialog(
                                                     context: context,

@@ -1,4 +1,7 @@
+import 'package:every_parking/datasource/datasource.dart';
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 //회원가입 화면
 //로그 인 후에는 앱 켤떄 안보이게 하기
@@ -13,11 +16,12 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
   var id = "";
   var email = "";
   var pass = "";
-  var s_number;
-  var u_name;
-  var phone_num;
-  var address;
+  var s_number = 0;
+  var u_name = "";
+  var phone_num = 0;
+
   var isChecked = [false, false, false, false];
+  var datasource = new Datasource();
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +77,7 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                 TextField(
                                   onChanged: (text) {
                                     setState(() {
-                                      s_number = text;
+                                      s_number = int.parse(text);
                                     });
                                   },
                                   //학번 입력되는 칸
@@ -115,7 +119,7 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                 TextField(
                                   onChanged: (text) {
                                     setState(() {
-                                      id = text;
+                                      phone_num = int.parse(text);
                                     });
                                   },
                                   //전화번호 입력되는 칸
@@ -185,26 +189,30 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     ButtonTheme(
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(50)),
-                                        // 로그인 버튼
-                                        minWidth: 100.0,
-                                        height: 50.0,
-                                        child: ElevatedButton(
-                                            style: ButtonStyle(
-                                                textStyle:
-                                                    MaterialStateProperty.all(
-                                                        const TextStyle(
-                                                            fontSize: 14,
-                                                            color:
-                                                                Colors.white)),
-                                                backgroundColor:
-                                                    MaterialStateProperty.all(
-                                                        Color.fromARGB(0xff,
-                                                            0x49, 0x7a, 0xa6))),
-                                            child: const Text("가입"),
-                                            onPressed: () {})),
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(50)),
+                                      // 로그인 버튼
+                                      minWidth: 100.0,
+                                      height: 50.0,
+                                      child: ElevatedButton(
+                                        style: ButtonStyle(
+                                            textStyle:
+                                                MaterialStateProperty.all(
+                                                    const TextStyle(
+                                                        fontSize: 14,
+                                                        color: Colors.white)),
+                                            backgroundColor:
+                                                MaterialStateProperty.all(
+                                                    Color.fromARGB(0xff, 0x49,
+                                                        0x7a, 0xa6))),
+                                        child: const Text("가입"),
+                                        onPressed: () {
+                                          datasource.registerUser(
+                                              s_number,u_name,id, pass, phone_num ,email);
+                                        },
+                                      ),
+                                    ),
                                     const SizedBox(
                                       width: 15,
                                     ),
