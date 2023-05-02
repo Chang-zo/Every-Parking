@@ -142,6 +142,7 @@ class ParkingCell2 extends StatelessWidget {
   }
 }
 
+//주차가 진행 될 회색 칸
 class ParkingCellClick extends StatelessWidget {
   String Zone;
   int parkingNum;
@@ -182,6 +183,7 @@ class ParkingCellClick extends StatelessWidget {
         child: Center(
           child: Text(
             Zone + parkingNum.toString(),
+            //시간 정보 받아오는게 진행된다면 여기에 추가하면 될듯!
             style: TextStyle(
               color: Colors.white,
               fontSize: 15,
