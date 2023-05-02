@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:flutter/src/material/refresh_indicator.dart';
+import 'package:http/http.dart' as http;
 
-import 'package:every_parking/parking_lot_map.dart';
+import 'package:every_parking/screen/parking_lot_map.dart';
 
 //로그인 후 보이는 첫화면
 class HomeScreen extends StatefulWidget {
@@ -12,7 +15,51 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreen();
 }
 
+class ListItem {
+  final String title;
+  final String subtitle;
+  final num amountParkingCell;
+  final num usedParkingCell;
+
+  ListItem(
+      {required this.title,
+      required this.subtitle,
+      required this.amountParkingCell,
+      required this.usedParkingCell});
+}
+
+List<ListItem> _items = [
+  ListItem(
+      title: "동문 주차장",
+      subtitle: "계명대학교",
+      amountParkingCell: 95,
+      usedParkingCell: 20),
+  ListItem(
+      title: "남문 주차장",
+      subtitle: "계명대학교",
+      amountParkingCell: 100,
+      usedParkingCell: 13),
+  // ...
+];
+
 class _HomeScreen extends State<HomeScreen> {
+  //주차장 상태 새로고침
+  // 주차장 별 사용중인 자리 수 새로 가져오기
+  Future<void> _refresh() async {
+    // HTTP 요청 보내기
+    final response = await http.get(Uri.parse('https://example.com/data.json'));
+    if (response.statusCode == 200) {
+      // 응답을 파싱해서 리스트 업데이트하기
+      final data = json.decode(response.body);
+      await Future.delayed(Duration(seconds: 1));
+      setState(() {
+        _items = List<String>.from(data).cast<ListItem>();
+      });
+    } else {
+      throw Exception('Failed to fetch data');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,59 +152,63 @@ class _HomeScreen extends State<HomeScreen> {
                         child: Container(
                           padding: EdgeInsets.only(
                               top: MediaQuery.of(context).size.height * 0.22),
-                          child: ListView.builder(
-                            itemCount: _items.length,
-                            itemBuilder: (context, index) {
-                              return GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => ParkingMap()),
-                                  );
-                                },
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 5.0),
-                                  child: Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: <Widget>[
-                                      Text(_items[index].title),
-                                      Container(
-                                        margin:
-                                            EdgeInsets.symmetric(vertical: 5),
-                                        width: 300,
-                                        height: 20,
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10)),
-                                          child: LinearProgressIndicator(
-                                            value:
-                                                (_items[index].usedParkingCell /
-                                                    _items[index]
-                                                        .amountParkingCell),
-                                            valueColor:
-                                                AlwaysStoppedAnimation<Color>(
-                                                    Color(0xff00ff00)),
-                                            backgroundColor: Color(0xffD6D6D6),
+                          child: RefreshIndicator(
+                            onRefresh: _refresh,
+                            child: ListView.builder(
+                              itemCount: _items.length,
+                              itemBuilder: (context, index) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => ParkingMap()),
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 5.0),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: <Widget>[
+                                        Text(_items[index].title),
+                                        Container(
+                                          margin:
+                                              EdgeInsets.symmetric(vertical: 5),
+                                          width: 300,
+                                          height: 20,
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(10)),
+                                            child: LinearProgressIndicator(
+                                              value: (_items[index]
+                                                      .usedParkingCell /
+                                                  _items[index]
+                                                      .amountParkingCell),
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                      Color(0xff00ff00)),
+                                              backgroundColor:
+                                                  Color(0xffD6D6D6),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      Text(_items[index]
-                                              .usedParkingCell
-                                              .toString() +
-                                          "/" +
-                                          _items[index]
-                                              .amountParkingCell
-                                              .toString()),
-                                      Text(_items[index].subtitle),
-                                      Divider(),
-                                    ],
+                                        Text(_items[index]
+                                                .usedParkingCell
+                                                .toString() +
+                                            "/" +
+                                            _items[index]
+                                                .amountParkingCell
+                                                .toString()),
+                                        Text(_items[index].subtitle),
+                                        Divider(),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           ),
                         )),
                     // 상단 고정 컨테이너
@@ -347,30 +398,3 @@ class _HomeScreen extends State<HomeScreen> {
     );
   }
 }
-
-class ListItem {
-  final String title;
-  final String subtitle;
-  final num amountParkingCell;
-  final num usedParkingCell;
-
-  ListItem(
-      {required this.title,
-      required this.subtitle,
-      required this.amountParkingCell,
-      required this.usedParkingCell});
-}
-
-List<ListItem> _items = [
-  ListItem(
-      title: "동문 주차장",
-      subtitle: "계명대학교",
-      amountParkingCell: 95,
-      usedParkingCell: 20),
-  ListItem(
-      title: "남문 주차장",
-      subtitle: "계명대학교",
-      amountParkingCell: 100,
-      usedParkingCell: 13),
-  // ...
-];
