@@ -60,10 +60,12 @@ class Datasource {
   Future<User> userInfo(String userId) async {
     final response = await http.get(Uri.parse(APIUrl.userInfoUrl), headers: {'Content-Type': 'application/json','userId' :userId }, );
 
-    print(response.statusCode);
     if (response.statusCode == 200) {
+      print("이름 ");
       print(json.decode(response.body));
-      return User.fromJson(json.decode(response.body));
+      var tmp = User.fromJson(json.decode(response.body));
+      print(tmp.studentName);
+      return tmp;
     } else {
       throw Exception('유저 정보 받기 실패');
     }

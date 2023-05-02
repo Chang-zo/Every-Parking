@@ -5,7 +5,6 @@ import 'package:every_parking/Model/user.dart';
 import 'package:every_parking/screen/parking_lot_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import '../datasource/datasource.dart';
 import 'package:every_parking/parking_lot_map.dart';
 
 //로그인 후 보이는 첫화면
@@ -17,17 +16,25 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreen extends State<HomeScreen> {
+
   var ds = new Datasource();
-  var user ;
   late var myParkingStatus;
+  var user = new User();
   var nowparkingList;
+
   void initState() {
     super.initState();
-    user = ds.userInfo(widget.userId);
-    print(user);
-    myParkingStatus = ds.myparkingStatus(widget.userId);
-    print(myParkingStatus);
-    nowparkingList = ds.nowParking(widget.userId);
+    _getUserInfo();
+  }
+
+  /* 유저 가져오기 */
+  void _getUserInfo() async {
+    User userInfo = await ds.userInfo(widget.userId);
+
+    setState(() {
+      user.studentName = userInfo.studentName;
+      user.status = userInfo.status;
+    });
   }
 
   @override
@@ -49,7 +56,7 @@ class _HomeScreen extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '$user.studentName 님 \n 어서오세요!',
+                        '${user.studentName} 님 \n 어서오세요!',
                         style: TextStyle(fontSize: 20),
                         maxLines: 2,
                       ),
