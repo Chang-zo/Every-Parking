@@ -32,8 +32,7 @@ class _HomeScreen extends State<HomeScreen> {
     //_getParkingLotInfo();
     nowParkingList = [
       ParkingLotInfo(name: "동문주차장", available: 15, total: 19),
-      ParkingLotInfo(name: "동문주차장", available: 15, total: 19),
-      ParkingLotInfo(name: "동문주차장", available: 15, total: 19),
+      ParkingLotInfo(name: "남문주차장", available: 13, total: 19),
     ];
   }
 

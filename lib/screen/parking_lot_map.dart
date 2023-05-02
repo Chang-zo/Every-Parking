@@ -1,17 +1,29 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import '';
+import '../Model/parkingLotInfo.dart';
+import '../Model/parkingarea.dart';
+import '../datasource/datasource.dart';
 
 class ParkingMap extends StatefulWidget {
-  var name;
+  final String name;
 
-  ParkingMap(this.name, {Key? key}) : super(key: key);
+  const ParkingMap(this.name, {Key? key}) : super(key: key);
 
   @override
   State<ParkingMap> createState() => _ParkingMapState();
 }
 
 class _ParkingMapState extends State<ParkingMap> {
+  /*void _getParkingLotInfo() async {
+    var ds = new Datasource();
+    List<ParkingArea> nowParkingStatusInfo = await ds.nowParking(widget.userId);
+
+    setState(() {
+      nowParkingList = nowParkingStatusInfo;
+    });
+  }*/
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,7 +41,7 @@ class _ParkingMapState extends State<ParkingMap> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
                 child: Text(
-                  "잔여석 : 20/95",
+                  widget.name == "동문주차장" ? "잔여석 : 4/19" : "잔여석 : 6/19",
                   style: TextStyle(fontSize: 20),
                 ),
               ),
@@ -141,10 +153,16 @@ class ParkingCell2 extends StatelessWidget {
 }
 
 //주차가 진행 될 회색 칸
-class ParkingCellClick extends StatelessWidget {
+class ParkingCellClick extends StatefulWidget {
   String Zone;
   int parkingNum;
   ParkingCellClick(this.Zone, this.parkingNum, {super.key});
+  @override
+  _ParkingCellClick createState() => _ParkingCellClick();
+}
+
+class _ParkingCellClick extends State<ParkingCellClick> {
+  bool isParked = false;
 
   @override
   Widget build(BuildContext context) {
@@ -153,34 +171,61 @@ class ParkingCellClick extends StatelessWidget {
         showDialog(
           context: context,
           builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text(Zone + parkingNum.toString() + "번"),
-              content: Text('해당 번호에 주차하시겠습니까?'),
-              actions: [
-                TextButton(
-                  child: Text('확인'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                TextButton(
-                  child: Text('취소'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
+            return isParked == true
+                ? AlertDialog(
+                    title:
+                        Text(widget.Zone + widget.parkingNum.toString() + "번"),
+                    content: Text('해당 번호에 주차중입니다.'),
+                    actions: [
+                      TextButton(
+                        child: Text('반납'),
+                        onPressed: () {
+                          setState(() {
+                            isParked = false;
+                          });
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      TextButton(
+                        child: Text('취소'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  )
+                : AlertDialog(
+                    title:
+                        Text(widget.Zone + widget.parkingNum.toString() + "번"),
+                    content: Text('해당 번호에 주차하시겠습니까?'),
+                    actions: [
+                      TextButton(
+                        child: Text('확인'),
+                        onPressed: () {
+                          setState(() {
+                            isParked = true;
+                          });
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      TextButton(
+                        child: Text('취소'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
           },
         );
       },
       child: Container(
         width: 50,
         height: 100,
-        color: Colors.grey,
+        color: isParked ? Colors.red : Colors.grey,
         child: Center(
           child: Text(
-            Zone + parkingNum.toString(),
+            widget.Zone + widget.parkingNum.toString(),
             //시간 정보 받아오는게 진행된다면 여기에 추가하면 될듯!
             style: TextStyle(
               color: Colors.white,

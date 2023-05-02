@@ -4,6 +4,7 @@ import 'package:every_parking/datasource/APIUrl.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../Model/parkingarea.dart';
 import '../Model/user.dart';
 import '../Model/parkingLotInfo.dart';
 
@@ -85,7 +86,7 @@ class Datasource {
   /* 내 주차 정보 확인 */
   Future<MyParkingStatus> myParkingStatus(String userId) async {
     final response = await http.get(
-      Uri.parse(APIUrl.userInfoUrl),
+      Uri.parse(APIUrl.userParkingInfoUrl),
       headers: {'Content-Type': 'application/json', 'userId': userId},
     );
 
@@ -99,13 +100,26 @@ class Datasource {
 
   /* 주차 현황 확인 */
   Future<List<ParkingLotInfo>> nowParking(String userId) async {
-    final response = await http.get(Uri.parse(APIUrl.parkingListUrl),
+    final response = await http.get(Uri.parse(APIUrl.parkingInfoUrl),
         headers: {'Content-Type': 'application/json', 'userId': userId});
 
     if (response.statusCode == 200) {
       print(json.decode(response.body));
       final List<dynamic> parsedJson = jsonDecode(response.body);
       return parsedJson.map((json) => ParkingLotInfo.fromJson(json)).toList();
+    } else {
+      throw Exception('현재 주차장 잔여석 정보 받기 실패');
+    }
+  }
+
+  /* 주차장 주차 현황 확인 */
+  Future<ParkingArea> nowParkingLotStatus(String userId) async {
+    final response = await http.get(Uri.parse(APIUrl.parkingListUrl),
+        headers: {'Content-Type': 'application/json', 'userId': userId});
+
+    if (response.statusCode == 200) {
+      print(json.decode(response.body));
+      return ParkingArea.fromJson(json.decode(response.body));
     } else {
       throw Exception('현재 주차장 정보 받기 실패');
     }
