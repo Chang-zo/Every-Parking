@@ -11,7 +11,7 @@ class RegisterCarScreen extends StatefulWidget {
   @override
   State<RegisterCarScreen> createState() => _RegisterCarScreen();
 }
-
+/* 등록 페이지 */
 class _RegisterCarScreen extends State<RegisterCarScreen> {
 
   var isChecked = [false, false, false]; /* 약관 */
