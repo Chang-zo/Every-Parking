@@ -1,4 +1,5 @@
 import 'package:every_parking/datasource/APIUrl.dart';
+import 'package:every_parking/screen/registration_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:every_parking/screen/sign_up_screen.dart';
 
@@ -121,17 +122,31 @@ class _LogInState extends State<LoginScreen> {
                                               //정보가 틀리다면
                                               //틀렸다고 팝업 띄우기
                                               /* 서버와 로그인 통신 .. 성공 -> true / 실패 -> false */
-                                              bool check = await datasource.loginUser(id, pass);
-                                              print(check);
+                                              /* 0509 .. 차량 등록 여부 -> 서버 body에 추가되서 옴 .. 그거 처리 생각해보기 */
+                                              bool check_login = await datasource.loginUser(id, pass);
+                                              bool check_register = !datasource.checkCar;
+                                              print(check_login);
 
-                                              if (check) {
+                                              /* 차량 등록되어 있고 로그인 성공 시 */
+                                              if (check_login && check_register) {
                                                 Navigator.pushReplacement(
                                                     context,
                                                     MaterialPageRoute(
                                                         builder: (BuildContext
                                                                 context) =>
-                                                            MainScreen(userId: id,)));
-                                              } else {
+                                                            MainScreen(userId: id)));
+                                              }else if (check_login && !check_register) {
+                                                /* 차량 등록 안했고 로그인 성공 시 */
+                                                /* 0509 .. 차량 등록 페이지로 가고 거기서 뒤로 가기 할 때 -> MainScreen으로 보내보자 */
+                                                Navigator.pushReplacement(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                      RegisterCarScreen(userId: id)
+                                                ));
+
+                                              }else {
+                                                /* 로그인 실패 시 */
                                                 showDialog(
                                                     context: context,
                                                     barrierDismissible:

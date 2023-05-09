@@ -16,4 +16,8 @@ class APIUrl {
   static String get alertUrl => '$_baseUrl/alert/alert';
   static String get rentUrl => '$_baseUrl/parking/parking/rent';
   static String get infoUrl => '$_baseUrl/parking/parking/info';
+
+  /* 차량 등록 URL */
+  static String get carRegiUrl => '$_baseUrl/car/register';
+
 }

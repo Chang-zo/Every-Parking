@@ -2,13 +2,16 @@ import 'dart:convert';
 import 'package:every_parking/Model/parkingstatus.dart';
 import 'package:every_parking/datasource/APIUrl.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Model/parkingarea.dart';
 import '../Model/user.dart';
 import '../Model/parkingLotInfo.dart';
 
 class Datasource {
+
+  var checkCar;
+  bool get _checkCar => checkCar;
+
   /* 회원가입 */
   Future<bool> registerUser(int studentId, String studentName, String userId,
       String password, int phoneNumber, String email) async {
@@ -41,6 +44,10 @@ class Datasource {
       headers: {'Content-Type': 'application/json'},
       body: json.encode({'userId': userId, 'password': password}),
     );
+
+    final item = json.decode(response.body);
+    this.checkCar = item['registered'];
+    print('차량 등록 여부 ${item['registered']}');
 
     if (response.statusCode == 200) {
       /* jwt 사용 시 .. */
@@ -124,4 +131,37 @@ class Datasource {
       throw Exception('현재 주차장 정보 받기 실패');
     }
   }
+
+  /* 차량 등록 */
+  Future<bool> carRegister(String userId, String carNumber, String modelName) async {
+
+    final response = await http.post(
+      Uri.parse(APIUrl.carRegiUrl),
+      headers: {'Content-Type': 'application/json','userId': userId},
+      body: json.encode({'carNumber': carNumber, 'modelName': modelName}),
+    );
+
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      print('성공');
+      return true;
+    } else {
+      print('실패');
+      return false;
+    }
+  }
+
+  /* 로그인 시 차량 등록 여부 확인 */
+  Future<ParkingArea> getCarRegiCheck(String userId) async {
+    final response = await http.get(Uri.parse(APIUrl.parkingListUrl),
+        headers: {'Content-Type': 'application/json', 'userId': userId});
+
+    if (response.statusCode == 200) {
+      print(json.decode(response.body));
+      return ParkingArea.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('차 등록 여부 데이터 받기 실패');
+    }
+  }
+
 }
