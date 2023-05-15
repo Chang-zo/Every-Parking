@@ -6,6 +6,7 @@ import 'package:every_parking/screen/parking_lot_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:every_parking/screen/parking_lot_map.dart';
+import 'package:every_parking/screen/my_parking_status.dart';
 
 import '../Model/parkingLotInfo.dart';
 import '../Model/parkingstatus.dart';
@@ -347,7 +348,13 @@ class _HomeScreen extends State<HomeScreen> {
                                                 BorderRadius.circular(30.0),
                                           ),
                                         ),
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) =>
+                                                MyParkingInfo("번"),
+                                          );
+                                        },
                                         child: Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceAround,
@@ -373,7 +380,13 @@ class _HomeScreen extends State<HomeScreen> {
                                                 BorderRadius.circular(30.0),
                                           ),
                                         ),
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) =>
+                                                MyParkingInfo("번"),
+                                          );
+                                        },
                                         child: Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceAround,

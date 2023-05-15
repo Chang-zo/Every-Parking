@@ -4,6 +4,7 @@ import '';
 import '../Model/parkingLotInfo.dart';
 import '../Model/parkingarea.dart';
 import '../datasource/datasource.dart';
+import 'package:every_parking/screen/my_parking_status.dart';
 
 class ParkingMap extends StatefulWidget {
   final String name;
@@ -13,6 +14,8 @@ class ParkingMap extends StatefulWidget {
   @override
   State<ParkingMap> createState() => _ParkingMapState();
 }
+
+String appbarName = "";
 
 class _ParkingMapState extends State<ParkingMap> {
   /*void _getParkingLotInfo() async {
@@ -25,11 +28,16 @@ class _ParkingMapState extends State<ParkingMap> {
   }*/
 
   @override
+  void initState() {
+    super.initState();
+    appbarName = widget.name;
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           title: Text(
-            widget.name,
+            appbarName,
             style: TextStyle(color: Colors.white),
           ),
           backgroundColor: Color.fromARGB(0xff, 0x49, 0x7a, 0xa6),
@@ -163,40 +171,18 @@ class ParkingCellClick extends StatefulWidget {
 
 class _ParkingCellClick extends State<ParkingCellClick> {
   bool isParked = false;
+  bool _isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return isParked == true
-                ? AlertDialog(
-                    title:
-                        Text(widget.Zone + widget.parkingNum.toString() + "번"),
-                    content: Text('해당 번호에 주차중입니다.'),
-                    actions: [
-                      TextButton(
-                        child: Text('반납'),
-                        onPressed: () {
-                          setState(() {
-                            isParked = false;
-                          });
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      TextButton(
-                        child: Text('취소'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  )
-                : AlertDialog(
-                    title:
-                        Text(widget.Zone + widget.parkingNum.toString() + "번"),
+        isParked == false
+            ? showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text("${widget.Zone}${widget.parkingNum}번"),
                     content: Text('해당 번호에 주차하시겠습니까?'),
                     actions: [
                       TextButton(
@@ -216,8 +202,13 @@ class _ParkingCellClick extends State<ParkingCellClick> {
                       ),
                     ],
                   );
-          },
-        );
+                },
+              )
+            : showDialog(
+                context: context,
+                builder: (context) =>
+                    MyParkingInfo("${widget.Zone}${widget.parkingNum}번"),
+              );
       },
       child: Container(
         width: 50,
