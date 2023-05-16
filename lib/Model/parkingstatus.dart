@@ -1,15 +1,15 @@
 class MyParkingStatus {
-  var parkingId;
-  var remain;
-  var carNumber;
+  int? parkingId;
+  int? remain;
+  String? carNumber;
 
-  MyParkingStatus({ this.parkingId,this.remain,this.carNumber });
+  MyParkingStatus({this.parkingId, this.remain, this.carNumber});
 
-  factory MyParkingStatus.fromJson(Map<String, dynamic> json){
+  factory MyParkingStatus.fromJson(Map<String, dynamic> json) {
     return MyParkingStatus(
-      parkingId : json['parkingId'],
-      remain : json['remain'],
-      carNumber : json['carNumber'],
+      parkingId: json['parkingId'],
+      remain: json['remain'],
+      carNumber: json['carNumber'],
     );
   }
 }

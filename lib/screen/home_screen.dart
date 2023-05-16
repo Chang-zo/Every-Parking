@@ -29,10 +29,10 @@ class _HomeScreen extends State<HomeScreen> {
   void initState() {
     super.initState();
     _getUserInfo();
-    //_getUserCarInfo();
+    _getUserCarInfo();
     //_getParkingLotInfo();
     nowParkingList = [
-      ParkingLotInfo(name: "동문주차장", available: 15, total: 19),
+      ParkingLotInfo(name: "동문주차장", available: 15, total: 40),
       ParkingLotInfo(name: "남문주차장", available: 13, total: 19),
     ];
   }
@@ -56,6 +56,16 @@ class _HomeScreen extends State<HomeScreen> {
       myParkingStatus.parkingId = myParkingStatusInfo.parkingId;
       myParkingStatus.remain = myParkingStatusInfo.remain;
       myParkingStatus.carNumber = myParkingStatusInfo.carNumber;
+
+      if (myParkingStatus.parkingId == null) {
+        myParkingStatus.parkingId == "";
+      }
+      if (myParkingStatus.remain == null) {
+        myParkingStatus.remain == "";
+      }
+      if (myParkingStatus.carNumber == null) {
+        myParkingStatus.carNumber == "";
+      }
     });
   }
 
@@ -67,6 +77,17 @@ class _HomeScreen extends State<HomeScreen> {
     setState(() {
       nowParkingList = nowParkingStatusInfo;
     });
+  }
+
+  Future<void> _refresh() {
+    setState(() {
+      //서버 연결 후 아래 주석처리 된거 실행시키기!
+      //nowParkingList = nowParkingStatusInfo;
+      nowParkingList.add(
+        ParkingLotInfo(name: "동문주차장", available: 15, total: 56),
+      );
+    });
+    return Future<void>.value();
   }
 
   @override
@@ -161,61 +182,65 @@ class _HomeScreen extends State<HomeScreen> {
                         child: Container(
                           padding: EdgeInsets.only(
                               top: MediaQuery.of(context).size.height * 0.22),
-                          child: ListView.builder(
-                            itemCount: nowParkingList.length,
-                            itemBuilder: (context, index) {
-                              return GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => ParkingMap(
-                                            nowParkingList[index].name)),
-                                  );
-                                },
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 5.0),
-                                  child: Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: <Widget>[
-                                      Text(nowParkingList[index].name),
-                                      Container(
-                                        margin:
-                                            EdgeInsets.symmetric(vertical: 5),
-                                        width: 300,
-                                        height: 20,
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10)),
-                                          child: LinearProgressIndicator(
-                                            value: ((nowParkingList[index]
-                                                        .total -
-                                                    nowParkingList[index]
-                                                        .available) /
-                                                nowParkingList[index].total),
-                                            valueColor:
-                                                AlwaysStoppedAnimation<Color>(
-                                                    Color(0xff00ff00)),
-                                            backgroundColor: Color(0xffD6D6D6),
+                          child: RefreshIndicator(
+                            onRefresh: _refresh,
+                            child: ListView.builder(
+                              itemCount: nowParkingList.length,
+                              itemBuilder: (context, index) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => ParkingMap(
+                                              nowParkingList[index].name)),
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 5.0),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: <Widget>[
+                                        Text(nowParkingList[index].name),
+                                        Container(
+                                          margin:
+                                              EdgeInsets.symmetric(vertical: 5),
+                                          width: 300,
+                                          height: 20,
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(10)),
+                                            child: LinearProgressIndicator(
+                                              value: ((nowParkingList[index]
+                                                          .total -
+                                                      nowParkingList[index]
+                                                          .available) /
+                                                  nowParkingList[index].total),
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                      Color(0xff00ff00)),
+                                              backgroundColor:
+                                                  Color(0xffD6D6D6),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      Text((nowParkingList[index].total -
-                                                  nowParkingList[index]
-                                                      .available)
-                                              .toString() +
-                                          "/" +
-                                          nowParkingList[index]
-                                              .total
-                                              .toString()),
-                                      Divider(),
-                                    ],
+                                        Text((nowParkingList[index].total -
+                                                    nowParkingList[index]
+                                                        .available)
+                                                .toString() +
+                                            "/" +
+                                            nowParkingList[index]
+                                                .total
+                                                .toString()),
+                                        Divider(),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           ),
                         )),
                     // 상단 고정 컨테이너
@@ -266,37 +291,55 @@ class _HomeScreen extends State<HomeScreen> {
                                     MainAxisAlignment.spaceAround,
                                 children: [
                                   Container(
-                                    width: 150,
-                                    height: 80,
-                                    decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        border: Border.all(color: Colors.white),
-                                        borderRadius:
-                                            BorderRadius.circular(20.0),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.grey.withOpacity(0.2),
-                                            spreadRadius: 5,
-                                            blurRadius: 7,
-                                            offset: Offset(0,
-                                                8), // changes position of shadow
-                                          ),
-                                        ]),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text("자리번호"),
-                                        Divider(
-                                          color: Colors.grey,
-                                          thickness: 1,
-                                          indent: 10,
-                                          endIndent: 10,
-                                        ),
-                                        Text("차량번호")
-                                      ],
-                                    ),
-                                  ),
+                                      width: 150,
+                                      height: 80,
+                                      decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          border:
+                                              Border.all(color: Colors.white),
+                                          borderRadius:
+                                              BorderRadius.circular(20.0),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.grey.withOpacity(0.2),
+                                              spreadRadius: 5,
+                                              blurRadius: 7,
+                                              offset: Offset(0,
+                                                  8), // changes position of shadow
+                                            ),
+                                          ]),
+                                      child: user.status == true
+                                          ? Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(myParkingStatus.carNumber
+                                                    .toString()),
+                                                Divider(
+                                                  color: Colors.grey,
+                                                  thickness: 1,
+                                                  indent: 10,
+                                                  endIndent: 10,
+                                                ),
+                                                Text(myParkingStatus.parkingId
+                                                    .toString())
+                                              ],
+                                            )
+                                          : Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text("주차는"),
+                                                Divider(
+                                                  color: Colors.grey,
+                                                  thickness: 1,
+                                                  indent: 10,
+                                                  endIndent: 10,
+                                                ),
+                                                Text("하셨나요?")
+                                              ],
+                                            )),
                                   Container(
                                     width: 150,
                                     height: 80,
@@ -326,82 +369,91 @@ class _HomeScreen extends State<HomeScreen> {
                                           indent: 10,
                                           endIndent: 10,
                                         ),
-                                        Text("00시\n00분")
+                                        user.status == true
+                                            ? Text(myParkingStatus.remain
+                                                .toString())
+                                            : Text("00시\n00분")
                                       ],
                                     ),
                                   ),
                                 ],
                               ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  SizedBox(
-                                    width: 150,
-                                    height: 35,
-                                    child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Color.fromARGB(
-                                              0xFF, 0x2F, 0x64, 0x96),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(30.0),
-                                          ),
+                              user.status == true
+                                  ? Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        SizedBox(
+                                          width: 150,
+                                          height: 35,
+                                          child: ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Color.fromARGB(
+                                                    0xFF, 0x2F, 0x64, 0x96),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          30.0),
+                                                ),
+                                              ),
+                                              onPressed: () {
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (context) =>
+                                                      MyParkingInfo("번"),
+                                                );
+                                              },
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceAround,
+                                                children: [
+                                                  SvgPicture.asset(
+                                                    'assets/icons/white/custom.plus.app.svg',
+                                                    width: 20,
+                                                    height: 20,
+                                                  ),
+                                                  Text("시간연장")
+                                                ],
+                                              )),
                                         ),
-                                        onPressed: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (context) =>
-                                                MyParkingInfo("번"),
-                                          );
-                                        },
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
-                                          children: [
-                                            SvgPicture.asset(
-                                              'assets/icons/white/custom.plus.app.svg',
-                                              width: 20,
-                                              height: 20,
-                                            ),
-                                            Text("시간연장")
-                                          ],
-                                        )),
-                                  ),
-                                  SizedBox(
-                                    width: 150,
-                                    height: 35,
-                                    child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Color.fromARGB(
-                                              0xFF, 0x2F, 0x64, 0x96),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(30.0),
-                                          ),
-                                        ),
-                                        onPressed: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (context) =>
-                                                MyParkingInfo("번"),
-                                          );
-                                        },
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
-                                          children: [
-                                            SvgPicture.asset(
-                                              'assets/icons/white/custom.return.right.svg',
-                                              width: 20,
-                                              height: 20,
-                                            ),
-                                            Text("반납")
-                                          ],
-                                        )),
-                                  )
-                                ],
-                              ),
+                                        SizedBox(
+                                          width: 150,
+                                          height: 35,
+                                          child: ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Color.fromARGB(
+                                                    0xFF, 0x2F, 0x64, 0x96),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          30.0),
+                                                ),
+                                              ),
+                                              onPressed: () {
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (context) =>
+                                                      MyParkingInfo("번"),
+                                                );
+                                              },
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceAround,
+                                                children: [
+                                                  SvgPicture.asset(
+                                                    'assets/icons/white/custom.return.right.svg',
+                                                    width: 20,
+                                                    height: 20,
+                                                  ),
+                                                  Text("반납")
+                                                ],
+                                              )),
+                                        )
+                                      ],
+                                    )
+                                  : Container()
                             ],
                           ),
                         ),
