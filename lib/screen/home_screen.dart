@@ -90,6 +90,8 @@ class _HomeScreen extends State<HomeScreen> {
     return Future<void>.value();
   }
 
+  void isRegist(){}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -147,6 +149,7 @@ class _HomeScreen extends State<HomeScreen> {
                         width: 20,
                         height: 20,
                       ),
+
                       Text(
                         " 알람읽으시게~",
                         style: TextStyle(fontSize: 15),

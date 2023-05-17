@@ -163,6 +163,7 @@ class _RegisterCarScreen extends State<RegisterCarScreen> {
                                           child: const Text("등록"),
                                           onPressed: () {
                                             ds.carRegister(widget.userId ,carNumber, modelName);
+                                            Navigator.pop(context);
                                           },
                                         ),
                                       ),

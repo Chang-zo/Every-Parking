@@ -1,4 +1,5 @@
 import 'package:every_parking/datasource/datasource.dart';
+import 'package:every_parking/screen/registration_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -13,7 +14,7 @@ class SignUpUserScreen extends StatefulWidget {
 }
 
 class _SignUpUserScreen extends State<SignUpUserScreen> {
-  var id = "";
+  String id = "";
   var email = "";
   var pass = "";
   var s_number = 0;
@@ -221,7 +222,7 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                                       Color.fromARGB(0xff, 0x49,
                                                           0x7a, 0xa6))),
                                           child: const Text("가입"),
-                                          onPressed: () {
+                                          onPressed: () async {
                                             datasource.registerUser(
                                                 s_number,
                                                 u_name,
@@ -229,6 +230,12 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                                 pass,
                                                 phone_num,
                                                 email);
+                                            bool check_register = await datasource.registerUser(s_number, u_name,id, pass,phone_num,email);
+                                            if(check_register){
+                                              Navigator.pop(context);
+                                            }
+
+
                                           },
                                         ),
                                       ),
