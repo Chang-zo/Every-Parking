@@ -230,12 +230,6 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                                 pass,
                                                 phone_num,
                                                 email);
-                                            bool check_register = await datasource.registerUser(s_number, u_name,id, pass,phone_num,email);
-                                            if(check_register){
-                                              Navigator.pop(context);
-                                            }
-
-
                                           },
                                         ),
                                       ),
