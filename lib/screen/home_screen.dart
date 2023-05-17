@@ -56,6 +56,9 @@ class _HomeScreen extends State<HomeScreen> {
         user.status = true;
       });
     }
+    if (user.status = true) {
+      _startTimer();
+    }
   }
 
   int i = 99;
@@ -73,12 +76,13 @@ class _HomeScreen extends State<HomeScreen> {
     } catch (e) {
       setState(() {
         myParkingStatus.parkingId = 123;
-        myParkingStatus.remain = i--;
+        myParkingStatus.remain = i;
         myParkingStatus.carNumber = "aaaa";
       });
     }
     time_h = myParkingStatus.remain! ~/ 60;
     time_m = myParkingStatus.remain! % 60;
+    i--;
   }
 
   /*주차장 상태 가져오기*/
@@ -91,10 +95,13 @@ class _HomeScreen extends State<HomeScreen> {
     });
   }
 
-  Text _reMain() {
+  void _startTimer() {
     Timer.periodic(Duration(minutes: 1), (timer) {
       _getUserCarInfo();
     });
+  }
+
+  Text _reMain() {
     return Text("${time_h.toString()}시간\n${time_m.toString()}분");
   }
 
