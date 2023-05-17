@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:every_parking/datasource/datasource.dart';
@@ -25,6 +26,9 @@ class _HomeScreen extends State<HomeScreen> {
   var myParkingStatus = new MyParkingStatus();
   late List<ParkingLotInfo> nowParkingList;
 
+  int time_h = 0;
+  int time_m = 0;
+
   @override
   void initState() {
     super.initState();
@@ -32,41 +36,49 @@ class _HomeScreen extends State<HomeScreen> {
     _getUserCarInfo();
     //_getParkingLotInfo();
     nowParkingList = [
-      ParkingLotInfo(name: "동문주차장", available: 15, total: 40),
+      ParkingLotInfo(name: "동문주차장", available: 15, total: 56),
       ParkingLotInfo(name: "남문주차장", available: 13, total: 19),
     ];
   }
 
   /* 유저 가져오기 */
   void _getUserInfo() async {
-    User userInfo = await ds.userInfo(widget.userId);
+    try {
+      User userInfo = await ds.userInfo(widget.userId);
 
-    setState(() {
-      user.studentName = userInfo.studentName;
-      user.status = userInfo.status;
-    });
+      setState(() {
+        user.studentName = userInfo.studentName;
+        user.status = userInfo.status;
+      });
+    } catch (e) {
+      setState(() {
+        user.studentName = widget.userId;
+        user.status = true;
+      });
+    }
   }
 
+  int i = 99;
   /*내 자동차 정보 가져오기*/
   void _getUserCarInfo() async {
-    MyParkingStatus myParkingStatusInfo =
-        await ds.myParkingStatus(widget.userId);
+    try {
+      MyParkingStatus myParkingStatusInfo =
+          await Datasource().myParkingStatus(widget.userId);
 
-    setState(() {
-      myParkingStatus.parkingId = myParkingStatusInfo.parkingId;
-      myParkingStatus.remain = myParkingStatusInfo.remain;
-      myParkingStatus.carNumber = myParkingStatusInfo.carNumber;
-
-      if (myParkingStatus.parkingId == null) {
-        myParkingStatus.parkingId == "";
-      }
-      if (myParkingStatus.remain == null) {
-        myParkingStatus.remain == "";
-      }
-      if (myParkingStatus.carNumber == null) {
-        myParkingStatus.carNumber == "";
-      }
-    });
+      setState(() {
+        myParkingStatus.parkingId = myParkingStatusInfo.parkingId;
+        myParkingStatus.remain = myParkingStatusInfo.remain;
+        myParkingStatus.carNumber = myParkingStatusInfo.carNumber;
+      });
+    } catch (e) {
+      setState(() {
+        myParkingStatus.parkingId = 123;
+        myParkingStatus.remain = i--;
+        myParkingStatus.carNumber = "aaaa";
+      });
+    }
+    time_h = myParkingStatus.remain! ~/ 60;
+    time_m = myParkingStatus.remain! % 60;
   }
 
   /*주차장 상태 가져오기*/
@@ -77,6 +89,13 @@ class _HomeScreen extends State<HomeScreen> {
     setState(() {
       nowParkingList = nowParkingStatusInfo;
     });
+  }
+
+  Text _reMain() {
+    Timer.periodic(Duration(minutes: 1), (timer) {
+      _getUserCarInfo();
+    });
+    return Text("${time_h.toString()}시간\n${time_m.toString()}분");
   }
 
   Future<void> _refresh() {
@@ -90,7 +109,7 @@ class _HomeScreen extends State<HomeScreen> {
     return Future<void>.value();
   }
 
-  void isRegist(){}
+  void isRegist() {}
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +168,6 @@ class _HomeScreen extends State<HomeScreen> {
                         width: 20,
                         height: 20,
                       ),
-
                       Text(
                         " 알람읽으시게~",
                         style: TextStyle(fontSize: 15),
@@ -373,9 +391,8 @@ class _HomeScreen extends State<HomeScreen> {
                                           endIndent: 10,
                                         ),
                                         user.status == true
-                                            ? Text(myParkingStatus.remain
-                                                .toString())
-                                            : Text("00시\n00분")
+                                            ? _reMain()
+                                            : Text("00시간\n00분")
                                       ],
                                     ),
                                   ),

@@ -27,8 +27,8 @@ class MyApp extends StatelessWidget {
         ),
       ),
       //실행 시키면 가장 먼저 보이는 화면
-      home: const LoginScreen(),
-      //home: const MainScreen(userId: "바보"),
+      //home: const LoginScreen(),
+      home: const MainScreen(userId: "바보"),
     );
   }
 }
