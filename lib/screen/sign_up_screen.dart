@@ -222,14 +222,37 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                                       Color.fromARGB(0xff, 0x49,
                                                           0x7a, 0xa6))),
                                           child: const Text("가입"),
-                                          onPressed: () async {
-                                            datasource.registerUser(
+                                          onPressed: ()  async {
+                                            if( await datasource.registerUser(
                                                 s_number,
                                                 u_name,
                                                 id,
                                                 pass,
                                                 phone_num,
-                                                email);
+                                                email))
+                                            {Navigator.of(context).pop();}
+                                            else{
+                                              /* 회원가입 실패 시 */
+                                              AlertDialog(
+                                                content: const Text(
+                                                    "회워가입을 다시 시도해주세요"),
+                                                insetPadding:
+                                                const EdgeInsets
+                                                    .fromLTRB(
+                                                    0, 80, 0, 80),
+                                                actions: [
+                                                  TextButton(
+                                                    child: const Text(
+                                                        '확인'),
+                                                    onPressed: () {
+                                                      Navigator.of(
+                                                          context)
+                                                          .pop();
+                                                    },
+                                                  ),
+                                                ],
+                                              );
+                                            }
                                           },
                                         ),
                                       ),

@@ -120,13 +120,14 @@ class Datasource {
   }
 
   /* 주차장 주차 현황 확인 */
-  Future<ParkingArea> nowParkingLotStatus(String userId) async {
+  Future<List<ParkingArea>> nowParkingLotStatus(String userId) async {
     final response = await http.get(Uri.parse(APIUrl.parkingListUrl),
         headers: {'Content-Type': 'application/json', 'userId': userId});
 
     if (response.statusCode == 200) {
       print(json.decode(response.body));
-      return ParkingArea.fromJson(json.decode(response.body));
+      final List<dynamic> parsedJson = jsonDecode(response.body);
+      return parsedJson.map((json) => ParkingArea.fromJson(json)).toList();
     } else {
       throw Exception('현재 주차장 정보 받기 실패');
     }
@@ -164,4 +165,21 @@ class Datasource {
     }
   }
 
+  /* 주차장 지도에서 주차 등록할 때 보내는 데이터 */
+  Future<bool> setParking(String userId, int parkingId) async {
+    final response = await http.post(
+      Uri.parse(APIUrl.carRegiUrl),
+      headers: {'Content-Type': 'application/json','userId': userId},
+      body: json.encode({'parkingId': parkingId}),
+    );
+
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      print('성공');
+      return true;
+    } else {
+      print('실패');
+      return false;
+    }
+  }
 }

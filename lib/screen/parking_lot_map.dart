@@ -8,8 +8,9 @@ import 'package:every_parking/screen/my_parking_status.dart';
 
 class ParkingMap extends StatefulWidget {
   final String name;
+  final String userId;
 
-  const ParkingMap(this.name, {Key? key}) : super(key: key);
+  const ParkingMap(this.name, this.userId, {Key? key}) : super(key: key);
 
   @override
   State<ParkingMap> createState() => _ParkingMapState();
@@ -18,14 +19,6 @@ class ParkingMap extends StatefulWidget {
 String appbarName = "";
 
 class _ParkingMapState extends State<ParkingMap> {
-  /*void _getParkingLotInfo() async {
-    var ds = new Datasource();
-    List<ParkingArea> nowParkingStatusInfo = await ds.nowParking(widget.userId);
-
-    setState(() {
-      nowParkingList = nowParkingStatusInfo;
-    });
-  }*/
 
   @override
   void initState() {
@@ -61,12 +54,12 @@ class _ParkingMapState extends State<ParkingMap> {
                   return Row(
                     children: [
                       Column(children: [
-                        ParkingCell1(index, "B"),
+                        ParkingCell1(index, "B", widget.userId),
                         SizedBox(height: 100),
-                        ParkingCell2(index, "B"),
-                        ParkingCell2(index, "A"),
+                        ParkingCell2(index, "B", widget.userId),
+                        ParkingCell2(index, "A", widget.userId),
                         SizedBox(height: 100),
-                        ParkingCell1(index, "A"),
+                        ParkingCell1(index, "A", widget.userId),
                       ])
                     ],
                   );
@@ -81,7 +74,8 @@ class _ParkingMapState extends State<ParkingMap> {
 class ParkingCell1 extends StatelessWidget {
   String Zone;
   int index;
-  ParkingCell1(this.index, this.Zone, {super.key});
+  String userId;
+  ParkingCell1(this.index, this.Zone, this.userId, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -129,14 +123,15 @@ class ParkingCell1 extends StatelessWidget {
                       ),
                     )),
                   )
-                : ParkingCellClick(Zone, parkingNum);
+                : ParkingCellClick(Zone, parkingNum,userId);
   }
 }
 
 class ParkingCell2 extends StatelessWidget {
   String Zone;
   int index;
-  ParkingCell2(this.index, this.Zone, {super.key});
+  String userId;
+  ParkingCell2(this.index, this.Zone, this.userId, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -156,7 +151,7 @@ class ParkingCell2 extends StatelessWidget {
                 height: 100,
                 width: 50,
               )
-            : ParkingCellClick(Zone, parkingNum);
+            : ParkingCellClick(Zone, parkingNum, userId);
   }
 }
 
@@ -164,20 +159,44 @@ class ParkingCell2 extends StatelessWidget {
 class ParkingCellClick extends StatefulWidget {
   String Zone;
   int parkingNum;
-  ParkingCellClick(this.Zone, this.parkingNum, {super.key});
+  String userId;
+  ParkingCellClick(this.Zone, this.parkingNum, this.userId ,{super.key});
+
   @override
   _ParkingCellClick createState() => _ParkingCellClick();
 }
 
 class _ParkingCellClick extends State<ParkingCellClick> {
-  bool isParked = false;
-  bool _isExpanded = false;
+
+  late List<ParkingArea> nowParkingList;
+
+  void _getParkingLotInfo() async {
+    List<ParkingArea> nowParkingStatusInfo = await Datasource().nowParkingLotStatus(widget.userId);
+
+    setState(() {
+      nowParkingList = nowParkingStatusInfo;
+    });
+  }
+
+  late int parkingId;
+  var ds = new Datasource();
+
+  @override
+  void initState() {
+    super.initState();
+    _getParkingLotInfo();
+    if(widget.Zone == "A"){
+      parkingId = widget.parkingNum-1;
+    } else{
+      parkingId = widget.parkingNum + 26;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        isParked == false
+        nowParkingList[parkingId].parkingStatus == false
             ? showDialog(
                 context: context,
                 builder: (BuildContext context) {
@@ -188,8 +207,10 @@ class _ParkingCellClick extends State<ParkingCellClick> {
                       TextButton(
                         child: Text('확인'),
                         onPressed: () {
+                            ds.setParking(widget.userId, parkingId);
+
                           setState(() {
-                            isParked = true;
+                            nowParkingList[parkingId].parkingStatus = true;
                           });
                           Navigator.of(context).pop();
                         },
@@ -213,7 +234,7 @@ class _ParkingCellClick extends State<ParkingCellClick> {
       child: Container(
         width: 50,
         height: 100,
-        color: isParked ? Colors.red : Colors.grey,
+        color: nowParkingList[parkingId].parkingStatus ? Colors.red : Colors.grey,
         child: Center(
           child: Text(
             widget.Zone + widget.parkingNum.toString(),

@@ -1,5 +1,4 @@
 import 'package:every_parking/datasource/datasource.dart';
-import 'package:every_parking/screen/home_screen.dart';
 import 'package:every_parking/screen/main_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

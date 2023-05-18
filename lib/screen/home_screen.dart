@@ -61,7 +61,7 @@ class _HomeScreen extends State<HomeScreen> {
     }
   }
 
-  int i = 99;
+  int i = 5;
   /*내 자동차 정보 가져오기*/
   void _getUserCarInfo() async {
     try {
@@ -72,7 +72,10 @@ class _HomeScreen extends State<HomeScreen> {
         myParkingStatus.parkingId = myParkingStatusInfo.parkingId;
         myParkingStatus.remain = myParkingStatusInfo.remain;
         myParkingStatus.carNumber = myParkingStatusInfo.carNumber;
+        i = myParkingStatus.remain!;
       });
+      i--;
+
     } catch (e) {
       setState(() {
         myParkingStatus.parkingId = 123;
@@ -82,7 +85,7 @@ class _HomeScreen extends State<HomeScreen> {
     }
     time_h = myParkingStatus.remain! ~/ 60;
     time_m = myParkingStatus.remain! % 60;
-    i--;
+
   }
 
   /*주차장 상태 가져오기*/
@@ -96,8 +99,16 @@ class _HomeScreen extends State<HomeScreen> {
   }
 
   void _startTimer() {
-    Timer.periodic(Duration(minutes: 1), (timer) {
+    Timer.periodic(Duration(seconds: 2), (timer) {
       _getUserCarInfo();
+      if(myParkingStatus.remain == 0){
+        setState(() {
+          myParkingStatus.remain = null;
+          user.status = false;
+        });
+
+        timer.cancel();
+      }
     });
   }
 
@@ -221,7 +232,7 @@ class _HomeScreen extends State<HomeScreen> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => ParkingMap(
-                                              nowParkingList[index].name)),
+                                              nowParkingList[index].name, widget.userId)),
                                     );
                                   },
                                   child: Padding(
