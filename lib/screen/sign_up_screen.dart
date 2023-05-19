@@ -56,7 +56,7 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                         Padding(
                           padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
                           child: Text(
-                            "회원가입",
+                            "살려줘",
                             style: TextStyle(
                               fontSize: 20,
                             ),
@@ -86,7 +86,7 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                     //학번 입력되는 칸
                                     decoration:
                                         InputDecoration(labelText: '학번'),
-                                    keyboardType: TextInputType.number,
+                                    keyboardType: TextInputType.text,
                                   ),
                                   TextField(
                                     onChanged: (text) {
@@ -131,7 +131,7 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                     //전화번호 입력되는 칸
                                     decoration:
                                         InputDecoration(labelText: '전화번호'),
-                                    keyboardType: TextInputType.phone,
+                                    keyboardType: TextInputType.text,
                                   ),
                                   TextField(
                                     onChanged: (text) {
@@ -142,7 +142,7 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                     //이메일 입력되는 칸
                                     decoration:
                                         InputDecoration(labelText: '이메일'),
-                                    keyboardType: TextInputType.emailAddress,
+                                    keyboardType: TextInputType.text,
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
@@ -152,46 +152,10 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                         Row(
                                           children: [
                                             Checkbox(
-                                                value: isChecked[0],
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    isChecked[0] = value!;
-                                                  });
-                                                }),
-                                            Text("이용약관"),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Checkbox(
                                                 value: isChecked[1],
                                                 onChanged: (value) {
                                                   setState(() {
                                                     isChecked[1] = value!;
-                                                  });
-                                                }),
-                                            Text("이용약관"),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Checkbox(
-                                                value: isChecked[2],
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    isChecked[2] = value!;
-                                                  });
-                                                }),
-                                            Text("이용약관"),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Checkbox(
-                                                value: isChecked[3],
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    isChecked[3] = value!;
                                                   });
                                                 }),
                                             Text("이용약관"),
@@ -222,35 +186,91 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                                       Color.fromARGB(0xff, 0x49,
                                                           0x7a, 0xa6))),
                                           child: const Text("가입"),
-                                          onPressed: ()  async {
-                                            if( await datasource.registerUser(
-                                                s_number,
-                                                u_name,
-                                                id,
-                                                pass,
-                                                phone_num,
-                                                email))
-                                            {Navigator.of(context).pop();}
-                                            else{
+                                          onPressed: () async {
+                                            int result =
+                                                await datasource.registerUser(
+                                                    s_number,
+                                                    u_name,
+                                                    id,
+                                                    pass,
+                                                    phone_num,
+                                                    email);
+                                            print(result);
+                                            if (result == 200) {
+                                              showDialog(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return AlertDialog(
+                                                    content: const Text(
+                                                        "가입에 성공하였습니다."),
+                                                    insetPadding:
+                                                        const EdgeInsets
+                                                                .fromLTRB(
+                                                            0, 80, 0, 80),
+                                                    actions: [
+                                                      TextButton(
+                                                        child: const Text('확인'),
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop();
+
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
+                                            } else if (result == 400) {
+                                              showDialog(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return AlertDialog(
+                                                    content: const Text(
+                                                        "이미 등록된 아이디입니다.\n다시 시도해주세요"),
+                                                    insetPadding:
+                                                        const EdgeInsets
+                                                                .fromLTRB(
+                                                            0, 80, 0, 80),
+                                                    actions: [
+                                                      TextButton(
+                                                        child: const Text('확인'),
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
+                                            } else {
                                               /* 회원가입 실패 시 */
-                                              AlertDialog(
-                                                content: const Text(
-                                                    "회워가입을 다시 시도해주세요"),
-                                                insetPadding:
-                                                const EdgeInsets
-                                                    .fromLTRB(
-                                                    0, 80, 0, 80),
-                                                actions: [
-                                                  TextButton(
-                                                    child: const Text(
-                                                        '확인'),
-                                                    onPressed: () {
-                                                      Navigator.of(
-                                                          context)
-                                                          .pop();
-                                                    },
-                                                  ),
-                                                ],
+                                              showDialog(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return AlertDialog(
+                                                    content: const Text(
+                                                        "잠시후 다시 시도해주세요"),
+                                                    insetPadding:
+                                                        const EdgeInsets
+                                                                .fromLTRB(
+                                                            0, 80, 0, 80),
+                                                    actions: [
+                                                      TextButton(
+                                                        child: const Text('확인'),
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
                                               );
                                             }
                                           },

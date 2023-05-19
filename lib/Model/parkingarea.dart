@@ -2,11 +2,11 @@
 
 class ParkingArea {
   var parkingId;
-  var parkingStatus;
+  bool parkingStatus;
 
   ParkingArea({
     this.parkingId,
-    this.parkingStatus,
+    required this.parkingStatus,
   });
 
   factory ParkingArea.fromJson(Map<String, dynamic> json) {

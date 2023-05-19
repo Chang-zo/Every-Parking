@@ -13,11 +13,13 @@ class APIUrl {
       '$_baseUrl/parking/myParkingStatus'; //내차량정보(주차중인 칸, 남은시간, 차번호)
 
   static String get parkingListUrl => '$_baseUrl/parking/parkingList';
+
   static String get alertUrl => '$_baseUrl/alert/alert';
+
   static String get rentUrl => '$_baseUrl/parking/parking/rent';
+
   static String get infoUrl => '$_baseUrl/parking/parking/info';
 
   /* 차량 등록 URL */
   static String get carRegiUrl => '$_baseUrl/car/register';
-
 }

@@ -1,7 +1,45 @@
+import 'package:every_parking/screen/login_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class MyPageScreen extends StatelessWidget {
+class MyPageScreen extends StatefulWidget {
   const MyPageScreen({Key? key}) : super(key: key);
+
+  @override
+  State<MyPageScreen> createState() => _MyPageScreenState();
+}
+
+class _MyPageScreenState extends State<MyPageScreen> {
+  static final storage = FlutterSecureStorage();
+  dynamic userInfo = '';
+
+  logout() async {
+    await storage.delete(key: 'login');
+    await storage.delete(key: 'carNum');
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => LoginScreen()));
+  }
+
+  checkUserState() async {
+    userInfo = await storage.read(key: 'login');
+    if (userInfo == null) {
+      print('로그인 페이지로 이동');
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => LoginScreen()));
+    } else {
+      print('로그인 중');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 비동기로 flutter secure storage 정보를 불러오는 작업
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      checkUserState();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,12 +145,19 @@ class MyPageScreen extends StatelessWidget {
                     child: Text(
                       '기타',
                       style:
-                      TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                   ),
                   Setting(content: '알람 설정'),
                   Setting(content: '회원 탈퇴'),
-                  Setting(content: '로그아웃')
+                  GestureDetector(
+                      onTap: () {
+                        logout();
+                      },
+                      child: Text(
+                        '로그아웃',
+                        style: TextStyle(fontSize: 18),
+                      ))
                 ],
               ),
             ),

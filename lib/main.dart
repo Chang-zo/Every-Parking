@@ -17,6 +17,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      routes: {
+        '/main': (context) => MainScreen(
+              userId: '이게 작동된다는건 로그인이 됐다는건데 왜 이름이 인식이 안되냐',
+            ),
+      },
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         appBarTheme: const AppBarTheme(
@@ -27,8 +32,8 @@ class MyApp extends StatelessWidget {
         ),
       ),
       //실행 시키면 가장 먼저 보이는 화면
-      //home: const LoginScreen(),
-      home: const MainScreen(userId: "바보"),
+      home: const LoginScreen(),
+      //home: const MainScreen(userId: "바보"),
     );
   }
 }

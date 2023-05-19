@@ -9,7 +9,7 @@ import 'package:bottom_indicator_bar_svg/bottom_indicator_bar_svg.dart';
 
 class MainScreen extends StatefulWidget {
   final String userId;
-  const MainScreen({Key? key, required this.userId }) : super(key: key);
+  const MainScreen({Key? key, required this.userId}) : super(key: key);
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -48,7 +48,9 @@ class _MainScreenState extends State<MainScreen> {
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          HomeScreen(userId: widget.userId,),
+          HomeScreen(
+            userId: widget.userId,
+          ),
           ReportScreen(),
           NoticeScreen(),
           MyPageScreen()

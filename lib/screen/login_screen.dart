@@ -1,8 +1,14 @@
+import 'dart:convert';
+
 import 'package:every_parking/datasource/APIUrl.dart';
 import 'package:every_parking/screen/registration_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:every_parking/screen/sign_up_screen.dart';
 
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../Model/parkingstatus.dart';
+import '../Model/user.dart';
 import '../datasource/datasource.dart';
 import 'main_screen.dart';
 
@@ -17,7 +23,135 @@ class _LogInState extends State<LoginScreen> {
   var id = "";
   var pass = "";
 
-  var datasource = new Datasource();
+  static final storage = FlutterSecureStorage();
+  dynamic userInfo = '';
+  dynamic userCarInfo = '';
+
+  var userId;
+  var userpass;
+  //flutter_secure_storage 사용을 위한 초기화 작업
+  @override
+  void initState() {
+    super.initState();
+
+    // 비동기로 flutter secure storage 정보를 불러오는 작업
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _asyncMethod();
+    });
+  }
+
+  check_car() async {
+    if (userCarInfo == null) {
+      try {
+        MyParkingStatus myParkingStatusInfo =
+            await Datasource().myParkingStatus(userId);
+
+        if (myParkingStatusInfo == false) {
+          print("해당아이디에 저장된 차량등록정보가 없습니다----");
+          print(userCarInfo);
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => RegisterCarScreen(userId: userId),
+              ));
+        } else {
+          print("서버에 저장된 차량등록정보가 있습니다.");
+          var val = json.encode({
+            'carNumber': myParkingStatusInfo.carNumber,
+            'modelName': myParkingStatusInfo.parkingId
+          });
+          await storage.write(
+            key: 'carNum',
+            value: val,
+          );
+          print(userCarInfo);
+        }
+      } catch (e) {
+        print("로그인 화면 check_car함수에서 자꾸 try 탈출한다--");
+      }
+    }
+  }
+
+  _asyncMethod() async {
+    // read 함수로 key값에 맞는 정보를 불러오고 데이터타입은 String 타입
+    // 데이터가 없을때는 null을 반환
+    userInfo = await storage.read(key: 'login');
+    userCarInfo = await storage.read(key: 'carNum');
+
+    // user의 정보가 있다면 로그인 후 들어가는 첫 페이지로 넘어가게 합니다.
+    if (userInfo != null) {
+      try {
+        var parsedJson = json.decode(userInfo);
+        userId = parsedJson['userId'];
+        userpass = parsedJson['password'];
+
+        final response = await http.post(
+          Uri.parse(APIUrl.loginUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({'userId': userId, 'password': userpass}),
+        );
+        if (response.statusCode == 200) {
+          print("로컬데이터 로그인성공");
+          check_car();
+        } else {
+          print("로컬데이터 로그인실패");
+        }
+      } catch (e) {
+        print("로컬 데이터로 로그인중 예외발생");
+      }
+
+      id = userId;
+
+      print('로그인이 정보가 존재합니다.');
+      print(userInfo);
+
+      // 파싱된 데이터 사용
+
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (context) => MainScreen(userId: userId)));
+    } else {
+      print('로그인이 필요합니다');
+    }
+  }
+
+  loginAction(id, pass) async {
+    try {
+      final response = await http.post(
+        Uri.parse(APIUrl.loginUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'userId': id, 'password': pass}),
+      );
+
+      if (response.statusCode == 200) {
+        var val = json.encode({'userId': id, 'password': pass});
+
+        await storage.write(
+          key: 'login',
+          value: val,
+        );
+
+        print("로그인 성공!!!!!!!");
+
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => MainScreen(userId: id)));
+
+        print(userCarInfo);
+
+        check_car();
+
+        return 0;
+      } else if (response.statusCode == 400) {
+        print("아이디 혹은 비번 오류");
+        return 1;
+      } else {
+        print("로그인 실패");
+        return 1;
+      }
+    } catch (e) {
+      print("로그인 catch문 실행");
+      return 1;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +212,7 @@ class _LogInState extends State<LoginScreen> {
                                   },
                                   //아이디가 입력되는 칸
                                   decoration: InputDecoration(labelText: 'ID'),
-                                  keyboardType: TextInputType.emailAddress,
+                                  keyboardType: TextInputType.text,
                                 ),
                                 TextField(
                                   onChanged: (text) {
@@ -116,36 +250,11 @@ class _LogInState extends State<LoginScreen> {
                                                             0x49, 0x7a, 0xa6))),
                                             child: const Text("Log in"),
                                             onPressed: () async {
-                                              //로그인 버튼을 눌렀을 때 작동될 코드
-                                              //정보가 맞다면
-                                              //홈 화면으로 이동
-                                              //정보가 틀리다면
-                                              //틀렸다고 팝업 띄우기
-                                              /* 서버와 로그인 통신 .. 성공 -> true / 실패 -> false */
-                                              /* 0509 .. 차량 등록 여부 -> 서버 body에 추가되서 옴 .. 그거 처리 생각해보기 */
-                                              bool check_login = await datasource.loginUser(id, pass);
-                                              bool check_register = !datasource.checkCar;
-                                              print(check_login);
-
-                                              /* 차량 등록되어 있고 로그인 성공 시 */
-                                              if (check_login && check_register) {
-                                                Navigator.pushReplacement(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (BuildContext
-                                                                context) =>
-                                                            MainScreen(userId: id)));
-                                              }else if (check_login && !check_register) {
-                                                /* 차량 등록 안했고 로그인 성공 시 */
-                                                /* 0509 .. 차량 등록 페이지로 가고 거기서 뒤로 가기 할 때 -> MainScreen으로 보내보자 */
-                                                Navigator.pushReplacement(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) =>
-                                                      RegisterCarScreen(userId: id)
-                                                ));
-
-                                              }else {
+                                              int loginResult =
+                                                  loginAction(id, pass);
+                                              /* 로그인 성공 시 */
+                                              if (loginResult == 0) {
+                                              } else {
                                                 /* 로그인 실패 시 */
                                                 showDialog(
                                                     context: context,
@@ -155,7 +264,7 @@ class _LogInState extends State<LoginScreen> {
                                                         (BuildContext context) {
                                                       return AlertDialog(
                                                         content: const Text(
-                                                            "아이디와 비밀번호를 입력해 주세요"),
+                                                            "아이디와 비밀번호를 확인해 주세요"),
                                                         insetPadding:
                                                             const EdgeInsets
                                                                     .fromLTRB(

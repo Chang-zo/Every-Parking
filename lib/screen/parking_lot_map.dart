@@ -1,8 +1,12 @@
+import 'package:every_parking/screen/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'dart:convert';
-import '';
 import '../Model/parkingLotInfo.dart';
+import '../Model/parkingMapStatue.dart';
 import '../Model/parkingarea.dart';
+import '../Model/parkingstatus.dart';
+import '../Model/user.dart';
 import '../datasource/datasource.dart';
 import 'package:every_parking/screen/my_parking_status.dart';
 
@@ -16,14 +20,30 @@ class ParkingMap extends StatefulWidget {
   State<ParkingMap> createState() => _ParkingMapState();
 }
 
-String appbarName = "";
-
 class _ParkingMapState extends State<ParkingMap> {
+  parkingMapStatues? nowParkingList;
+  var ds = new Datasource();
+  String appbarName = "";
 
   @override
   void initState() {
     super.initState();
+    _getParkingLotInfo();
     appbarName = widget.name;
+  }
+
+  void _getParkingLotInfo() async {
+    parkingMapStatues? nowParkingStatusInfo =
+        await ds.nowParkingLotStatus(widget.userId) as parkingMapStatues?;
+
+    if (nowParkingStatusInfo != null) {
+      setState(() {
+        nowParkingList = nowParkingStatusInfo;
+      });
+    } else {
+      nowParkingList = parkingMapStatues(
+          name: "이게 왜 널이지", total: 10, used: 1, parkingInfoList: []);
+    }
   }
 
   Widget build(BuildContext context) {
@@ -42,25 +62,18 @@ class _ParkingMapState extends State<ParkingMap> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
                 child: Text(
-                  widget.name == "동문주차장" ? "잔여석 : 4/19" : "잔여석 : 6/19",
+                  '${widget.name} ${nowParkingList?.used}/${nowParkingList?.total}',
                   style: TextStyle(fontSize: 20),
                 ),
               ),
               Expanded(
                   child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: 19,
+                itemCount: 56,
                 itemBuilder: (BuildContext context, int index) {
                   return Row(
                     children: [
-                      Column(children: [
-                        ParkingCell1(index, "B", widget.userId),
-                        SizedBox(height: 100),
-                        ParkingCell2(index, "B", widget.userId),
-                        ParkingCell2(index, "A", widget.userId),
-                        SizedBox(height: 100),
-                        ParkingCell1(index, "A", widget.userId),
-                      ])
+                      Column(children: [ParkingCellClick(index, widget.userId)])
                     ],
                   );
                 },
@@ -71,146 +84,79 @@ class _ParkingMapState extends State<ParkingMap> {
   }
 }
 
-class ParkingCell1 extends StatelessWidget {
-  String Zone;
-  int index;
-  String userId;
-  ParkingCell1(this.index, this.Zone, this.userId, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    int parkingNum = index + 1;
-    if (index > 16) {
-      parkingNum = parkingNum - 3;
-    } else if (index > 10) {
-      parkingNum = parkingNum - 2;
-    } else if (index > 2) {
-      parkingNum = parkingNum - 1;
-    }
-    if (Zone == "A") {
-      parkingNum = parkingNum - 2;
-    }
-    return index == 2 || index == 10 || index == 16
-        ? Container(
-            color: Colors.yellow,
-            height: 100,
-            width: 50,
-          )
-        : Zone == "A" && index == 0
-            ? Container(
-                color: Colors.grey,
-                height: 100,
-                width: 50,
-                child: Center(
-                    child: Text(
-                  "출구",
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                )),
-              )
-            : Zone == "A" && index == 1
-                ? Container(
-                    color: Colors.grey,
-                    height: 100,
-                    width: 50,
-                    child: Center(
-                        child: Text(
-                      "입구",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                      ),
-                    )),
-                  )
-                : ParkingCellClick(Zone, parkingNum,userId);
-  }
-}
-
-class ParkingCell2 extends StatelessWidget {
-  String Zone;
-  int index;
-  String userId;
-  ParkingCell2(this.index, this.Zone, this.userId, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    int parkingNum = index + 14;
-    if (Zone == "A") {
-      parkingNum = parkingNum - 2;
-    }
-
-    return index == 0 || index == 1 || index == 17 || index == 18
-        ? SizedBox(
-            height: 100,
-            width: 50,
-          )
-        : index == 2 || index == 16
-            ? Container(
-                color: Colors.yellow,
-                height: 100,
-                width: 50,
-              )
-            : ParkingCellClick(Zone, parkingNum, userId);
-  }
-}
-
 //주차가 진행 될 회색 칸
 class ParkingCellClick extends StatefulWidget {
-  String Zone;
   int parkingNum;
   String userId;
-  ParkingCellClick(this.Zone, this.parkingNum, this.userId ,{super.key});
+  ParkingCellClick(this.parkingNum, this.userId, {super.key});
 
   @override
   _ParkingCellClick createState() => _ParkingCellClick();
 }
 
 class _ParkingCellClick extends State<ParkingCellClick> {
+  var ds = new Datasource();
+  late User user;
+  late parkingMapStatues nowParkingList;
+  late bool state;
 
-  late List<ParkingArea> nowParkingList;
+  void _getUserInfo() async {
+    try {
+      User userInfo = await ds.userInfo(widget.userId);
+
+      setState(() {
+        user.studentName = userInfo.studentName;
+        user.status = userInfo.status;
+      });
+    } catch (e) {
+      setState(() {
+        user.studentName = widget.userId;
+        user.status = true;
+      });
+    }
+  }
 
   void _getParkingLotInfo() async {
-    List<ParkingArea> nowParkingStatusInfo = await Datasource().nowParkingLotStatus(widget.userId);
+    parkingMapStatues nowParkingStatusInfo =
+        (await ds.nowParkingLotStatus(widget.userId)) as parkingMapStatues;
 
     setState(() {
       nowParkingList = nowParkingStatusInfo;
     });
   }
 
-  late int parkingId;
-  var ds = new Datasource();
-
   @override
   void initState() {
     super.initState();
+    _getUserInfo();
     _getParkingLotInfo();
-    if(widget.Zone == "A"){
-      parkingId = widget.parkingNum-1;
-    } else{
-      parkingId = widget.parkingNum + 26;
-    }
+    state = nowParkingList.parkingInfoList[widget.parkingNum].parkingStatus;
+  }
+
+  void reDraw() {
+    _getUserInfo();
+    _getParkingLotInfo();
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        nowParkingList[parkingId].parkingStatus == false
+        state == false
             ? showDialog(
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: Text("${widget.Zone}${widget.parkingNum}번"),
+                    title: Text("${widget.parkingNum}번"),
                     content: Text('해당 번호에 주차하시겠습니까?'),
                     actions: [
                       TextButton(
                         child: Text('확인'),
                         onPressed: () {
-                            ds.setParking(widget.userId, parkingId);
-
+                          ds.setParking(widget.userId, widget.parkingNum);
+                          reDraw();
                           setState(() {
-                            nowParkingList[parkingId].parkingStatus = true;
+                            state = true;
                           });
                           Navigator.of(context).pop();
                         },
@@ -227,17 +173,16 @@ class _ParkingCellClick extends State<ParkingCellClick> {
               )
             : showDialog(
                 context: context,
-                builder: (context) =>
-                    MyParkingInfo("${widget.Zone}${widget.parkingNum}번"),
+                builder: (context) => MyParkingInfo("${widget.parkingNum}번"),
               );
       },
       child: Container(
         width: 50,
         height: 100,
-        color: nowParkingList[parkingId].parkingStatus ? Colors.red : Colors.grey,
+        color: state ? Colors.red : Colors.grey,
         child: Center(
           child: Text(
-            widget.Zone + widget.parkingNum.toString(),
+            widget.parkingNum.toString(),
             //시간 정보 받아오는게 진행된다면 여기에 추가하면 될듯!
             style: TextStyle(
               color: Colors.white,

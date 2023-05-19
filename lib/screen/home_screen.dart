@@ -6,7 +6,6 @@ import 'package:every_parking/Model/user.dart';
 import 'package:every_parking/screen/parking_lot_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:every_parking/screen/parking_lot_map.dart';
 import 'package:every_parking/screen/my_parking_status.dart';
 
 import '../Model/parkingLotInfo.dart';
@@ -34,6 +33,7 @@ class _HomeScreen extends State<HomeScreen> {
     super.initState();
     _getUserInfo();
     _getUserCarInfo();
+    //_startTimer();
     //_getParkingLotInfo();
     nowParkingList = [
       ParkingLotInfo(name: "동문주차장", available: 15, total: 56),
@@ -45,7 +45,8 @@ class _HomeScreen extends State<HomeScreen> {
   void _getUserInfo() async {
     try {
       User userInfo = await ds.userInfo(widget.userId);
-
+      print("유저정보 가져오기 try문");
+      print(userInfo);
       setState(() {
         user.studentName = userInfo.studentName;
         user.status = userInfo.status;
@@ -55,15 +56,19 @@ class _HomeScreen extends State<HomeScreen> {
         user.studentName = widget.userId;
         user.status = true;
       });
-    }
-    if (user.status = true) {
-      _startTimer();
+
+      print("유저정보 가져오기 catch문");
+      print(user);
     }
   }
 
   int i = 5;
   /*내 자동차 정보 가져오기*/
   void _getUserCarInfo() async {
+    if (user.status == false) {
+      return;
+    }
+
     try {
       MyParkingStatus myParkingStatusInfo =
           await Datasource().myParkingStatus(widget.userId);
@@ -74,8 +79,6 @@ class _HomeScreen extends State<HomeScreen> {
         myParkingStatus.carNumber = myParkingStatusInfo.carNumber;
         i = myParkingStatus.remain!;
       });
-      i--;
-
     } catch (e) {
       setState(() {
         myParkingStatus.parkingId = 123;
@@ -85,7 +88,6 @@ class _HomeScreen extends State<HomeScreen> {
     }
     time_h = myParkingStatus.remain! ~/ 60;
     time_m = myParkingStatus.remain! % 60;
-
   }
 
   /*주차장 상태 가져오기*/
@@ -98,10 +100,10 @@ class _HomeScreen extends State<HomeScreen> {
     });
   }
 
-  void _startTimer() {
-    Timer.periodic(Duration(seconds: 2), (timer) {
-      _getUserCarInfo();
-      if(myParkingStatus.remain == 0){
+  void _startParkingTimer() {
+    Timer.periodic(Duration(minutes: 1), (timer) {
+      i--;
+      if (myParkingStatus.remain == 0) {
         setState(() {
           myParkingStatus.remain = null;
           user.status = false;
@@ -112,7 +114,16 @@ class _HomeScreen extends State<HomeScreen> {
     });
   }
 
+  //1초마다 새로 정보 가져오기
+  void _startTimer() {
+    Timer.periodic(Duration(seconds: 30), (timer) {
+      _getUserInfo();
+      _getUserCarInfo();
+    });
+  }
+
   Text _reMain() {
+    _startParkingTimer();
     return Text("${time_h.toString()}시간\n${time_m.toString()}분");
   }
 
@@ -232,7 +243,8 @@ class _HomeScreen extends State<HomeScreen> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => ParkingMap(
-                                              nowParkingList[index].name, widget.userId)),
+                                              nowParkingList[index].name,
+                                              widget.userId)),
                                     );
                                   },
                                   child: Padding(
