@@ -5,19 +5,19 @@ import 'dart:convert';
 class ParkingLotInfo {
   var name;
   var total;
-  var available;
+  var used;
 
   ParkingLotInfo({
     this.name,
     this.total,
-    this.available
+    this.used
   });
 
   factory ParkingLotInfo.fromJson(Map<String, dynamic> json){
     return ParkingLotInfo(
         name : json['name'],
         total : json['total'],
-        available : json['available']
+        used : json['used']
     );
   }
 }

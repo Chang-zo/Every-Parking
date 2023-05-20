@@ -34,10 +34,10 @@ class _HomeScreen extends State<HomeScreen> {
     _getUserInfo();
     _getUserCarInfo();
     //_startTimer();
-    //_getParkingLotInfo();
+    _getParkingLotInfo();
     nowParkingList = [
-      ParkingLotInfo(name: "동문주차장", available: 15, total: 56),
-      ParkingLotInfo(name: "남문주차장", available: 13, total: 19),
+      ParkingLotInfo(name: "동문주차장", used: 15, total: 56),
+      ParkingLotInfo(name: "남문주차장", used: 13, total: 19),
     ];
   }
 
@@ -92,11 +92,13 @@ class _HomeScreen extends State<HomeScreen> {
 
   /*주차장 상태 가져오기*/
   void _getParkingLotInfo() async {
-    List<ParkingLotInfo> nowParkingStatusInfo =
+    ParkingLotInfo nowParkingStatusInfo =
         await ds.nowParking(widget.userId);
 
+    print('home/ ${nowParkingStatusInfo.total},${nowParkingStatusInfo.used},${nowParkingStatusInfo.name}');
+
     setState(() {
-      nowParkingList = nowParkingStatusInfo;
+      nowParkingList.add(nowParkingStatusInfo);
     });
   }
 
@@ -132,7 +134,7 @@ class _HomeScreen extends State<HomeScreen> {
       //서버 연결 후 아래 주석처리 된거 실행시키기!
       //nowParkingList = nowParkingStatusInfo;
       nowParkingList.add(
-        ParkingLotInfo(name: "동문주차장", available: 15, total: 56),
+        ParkingLotInfo(name: "동문주차장", used: 15, total: 56),
       );
     });
     return Future<void>.value();
@@ -264,10 +266,9 @@ class _HomeScreen extends State<HomeScreen> {
                                             borderRadius: BorderRadius.all(
                                                 Radius.circular(10)),
                                             child: LinearProgressIndicator(
-                                              value: ((nowParkingList[index]
-                                                          .total -
+                                              value: (
                                                       nowParkingList[index]
-                                                          .available) /
+                                                          .used /
                                                   nowParkingList[index].total),
                                               valueColor:
                                                   AlwaysStoppedAnimation<Color>(
@@ -277,9 +278,8 @@ class _HomeScreen extends State<HomeScreen> {
                                             ),
                                           ),
                                         ),
-                                        Text((nowParkingList[index].total -
-                                                    nowParkingList[index]
-                                                        .available)
+                                        Text(
+                                            (nowParkingList[index].used)
                                                 .toString() +
                                             "/" +
                                             nowParkingList[index]

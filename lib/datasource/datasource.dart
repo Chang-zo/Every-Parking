@@ -93,16 +93,20 @@ class Datasource {
     }
   }
 
-  /* 주차 현황 확인 */
-  Future<List<ParkingLotInfo>> nowParking(String userId) async {
+  /* 주차 현황 확인
+  *  리스트 형태에서 ParkingLotInfo으로 변경됨 : 사유 , 한 주차장만 할 예정이니까
+  *  문의는 김규백씨한테 ..
+  *  초라해보이면 기존 방식처럼 동문 남문 주차장 앱에서 임의로 만들어 채울 것임
+  * */
+  Future<ParkingLotInfo> nowParking(String userId) async {
     final response = await http.get(Uri.parse(APIUrl.parkingInfoUrl),
         headers: {'Content-Type': 'application/json', 'userId': userId});
 
     if (response.statusCode == 200) {
       print(json.decode(response.body));
-      final List<dynamic> parsedJson = jsonDecode(response.body);
       print("주차장 현황 받아오기 성공");
-      return parsedJson.map((json) => ParkingLotInfo.fromJson(json)).toList();
+
+      return ParkingLotInfo.fromJson(json.decode(utf8.decode(response.bodyBytes)));
     } else {
       throw Exception('현재 주차장 잔여석 정보 받기 실패');
     }

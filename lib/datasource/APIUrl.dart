@@ -7,7 +7,7 @@ class APIUrl {
   static String get userInfoUrl => '$_baseUrl/member/userInfo';
   static String get parkingStatusUrl => '$_baseUrl/parking/parkingStatus';
   static String get parkingInfoUrl =>
-      '$_baseUrl/parking/parkingInfo'; //홈화면에 잔여석 출력
+      '$_baseUrl/parking/map/1'; //홈화면에 잔여석 출력
 
   static String get userParkingInfoUrl =>
       '$_baseUrl/parking/myParkingStatus'; //내차량정보(주차중인 칸, 남은시간, 차번호)
