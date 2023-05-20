@@ -1,15 +1,12 @@
 import 'dart:convert';
 
 import 'package:every_parking/datasource/APIUrl.dart';
-import 'package:every_parking/screen/registration_screen.dart';
+import 'package:every_parking/datasource/datasource.dart';
 import 'package:flutter/material.dart';
 import 'package:every_parking/screen/sign_up_screen.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../Model/parkingstatus.dart';
-import '../Model/user.dart';
-import '../datasource/datasource.dart';
 import 'main_screen.dart';
 
 //로그 인 후에는 앱 켤떄 안보이게 하기
@@ -25,7 +22,6 @@ class _LogInState extends State<LoginScreen> {
 
   static final storage = FlutterSecureStorage();
   dynamic userInfo = '';
-  dynamic userCarInfo = '';
 
   var userId;
   var userpass;
@@ -40,46 +36,14 @@ class _LogInState extends State<LoginScreen> {
     });
   }
 
-  check_car() async {
-    if (userCarInfo == null) {
-      try {
-        MyParkingStatus myParkingStatusInfo =
-            await Datasource().myParkingStatus(userId);
-
-        if (myParkingStatusInfo == false) {
-          print("해당아이디에 저장된 차량등록정보가 없습니다----");
-          print(userCarInfo);
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => RegisterCarScreen(userId: userId),
-              ));
-        } else {
-          print("서버에 저장된 차량등록정보가 있습니다.");
-          var val = json.encode({
-            'carNumber': myParkingStatusInfo.carNumber,
-            'modelName': myParkingStatusInfo.parkingId
-          });
-          await storage.write(
-            key: 'carNum',
-            value: val,
-          );
-          print(userCarInfo);
-        }
-      } catch (e) {
-        print("로그인 화면 check_car함수에서 자꾸 try 탈출한다--");
-      }
-    }
-  }
-
   _asyncMethod() async {
     // read 함수로 key값에 맞는 정보를 불러오고 데이터타입은 String 타입
     // 데이터가 없을때는 null을 반환
     userInfo = await storage.read(key: 'login');
-    userCarInfo = await storage.read(key: 'carNum');
 
     // user의 정보가 있다면 로그인 후 들어가는 첫 페이지로 넘어가게 합니다.
-    if (userInfo != null && userCarInfo != null) {
+    if (userInfo != null) {
+      print('로그인이 정보가 존재합니다.');
       try {
         var parsedJson = json.decode(userInfo);
         userId = parsedJson['userId'];
@@ -92,29 +56,17 @@ class _LogInState extends State<LoginScreen> {
         );
         if (response.statusCode == 200) {
           print("로컬데이터 로그인성공");
-          check_car();
         } else {
           print("로컬데이터 로그인실패");
         }
       } catch (e) {
         print("로컬 데이터로 로그인중 예외발생");
       }
-
       id = userId;
-
-      print('로그인이 정보가 존재합니다.');
       print(userInfo);
-
-      // 파싱된 데이터 사용
 
       Navigator.pushReplacement(context,
           MaterialPageRoute(builder: (context) => MainScreen(userId: userId)));
-    } else if (userCarInfo == null) {
-      print("로컬에 로그인 정보는 있지만 차량 등록 정보가 없습니다.");
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => RegisterCarScreen(userId: id)));
     } else {
       print('로그인이 필요합니다');
     }
@@ -122,13 +74,9 @@ class _LogInState extends State<LoginScreen> {
 
   loginAction(id, pass) async {
     try {
-      final response = await http.post(
-        Uri.parse(APIUrl.loginUrl),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({'userId': id, 'password': pass}),
-      );
+      int login_result = await Datasource().loginUser(id, pass);
 
-      if (response.statusCode == 200) {
+      if (login_result == 200) {
         var val = json.encode({'userId': id, 'password': pass});
 
         await storage.write(
@@ -140,22 +88,30 @@ class _LogInState extends State<LoginScreen> {
 
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) => MainScreen(userId: id)));
-
-        print(userCarInfo);
-
-        check_car();
-
-        return 0;
-      } else if (response.statusCode == 400) {
+      } else if (login_result == 400) {
         print("아이디 혹은 비번 오류");
-        return 1;
+        showDialog(
+            context: context,
+            barrierDismissible: true, // 바깥 영역 터치시 닫을지 여부
+            builder: (BuildContext context) {
+              return AlertDialog(
+                content: const Text("아이디와 비밀번호를 확인해 주세요"),
+                insetPadding: const EdgeInsets.fromLTRB(0, 80, 0, 80),
+                actions: [
+                  TextButton(
+                    child: const Text('확인'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            });
       } else {
         print("로그인 실패");
-        return 1;
       }
     } catch (e) {
       print("로그인 catch문 실행");
-      return 1;
     }
   }
 
@@ -256,39 +212,7 @@ class _LogInState extends State<LoginScreen> {
                                                             0x49, 0x7a, 0xa6))),
                                             child: const Text("Log in"),
                                             onPressed: () async {
-                                              int loginResult =
-                                                  loginAction(id, pass);
-                                              /* 로그인 성공 시 */
-                                              if (loginResult == 0) {
-                                              } else {
-                                                /* 로그인 실패 시 */
-                                                showDialog(
-                                                    context: context,
-                                                    barrierDismissible:
-                                                        true, // 바깥 영역 터치시 닫을지 여부
-                                                    builder:
-                                                        (BuildContext context) {
-                                                      return AlertDialog(
-                                                        content: const Text(
-                                                            "아이디와 비밀번호를 확인해 주세요"),
-                                                        insetPadding:
-                                                            const EdgeInsets
-                                                                    .fromLTRB(
-                                                                0, 80, 0, 80),
-                                                        actions: [
-                                                          TextButton(
-                                                            child: const Text(
-                                                                '확인'),
-                                                            onPressed: () {
-                                                              Navigator.of(
-                                                                      context)
-                                                                  .pop();
-                                                            },
-                                                          ),
-                                                        ],
-                                                      );
-                                                    });
-                                              }
+                                              loginAction(id, pass);
                                             })),
                                     const SizedBox(
                                       width: 15,

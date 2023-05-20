@@ -15,11 +15,11 @@ class SignUpUserScreen extends StatefulWidget {
 
 class _SignUpUserScreen extends State<SignUpUserScreen> {
   String id = "";
-  var email = "";
-  var pass = "";
-  var s_number = 0;
-  var u_name = "";
-  var phone_num = 0;
+  String email = "";
+  String pass = "";
+  int s_number = 0;
+  String u_name = "";
+  int phone_num = 0;
 
   var isChecked = [false, false, false, false];
   var datasource = new Datasource();
@@ -187,23 +187,19 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                                           0x7a, 0xa6))),
                                           child: const Text("가입"),
                                           onPressed: () async {
-                                            int result =
-                                                await datasource.registerUser(
-                                                    s_number,
-                                                    u_name,
-                                                    id,
-                                                    pass,
-                                                    phone_num,
-                                                    email);
-                                            print(result);
-                                            if (result == 200) {
+                                            if (id == "" ||
+                                                email == "" ||
+                                                pass == "" ||
+                                                s_number == 0 ||
+                                                u_name == "" ||
+                                                phone_num == 0) {
                                               showDialog(
                                                 context: context,
                                                 builder:
                                                     (BuildContext context) {
                                                   return AlertDialog(
                                                     content: const Text(
-                                                        "가입에 성공하였습니다."),
+                                                        "빈 항목을 채워주세요"),
                                                     insetPadding:
                                                         const EdgeInsets
                                                                 .fromLTRB(
@@ -212,35 +208,8 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                                       TextButton(
                                                         child: const Text('확인'),
                                                         onPressed: () {
-                                                          Navigator.of(context)
-                                                              .pop();
-
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        },
-                                                      ),
-                                                    ],
-                                                  );
-                                                },
-                                              );
-                                            } else if (result == 400) {
-                                              showDialog(
-                                                context: context,
-                                                builder:
-                                                    (BuildContext context) {
-                                                  return AlertDialog(
-                                                    content: const Text(
-                                                        "이미 등록된 아이디입니다.\n다시 시도해주세요"),
-                                                    insetPadding:
-                                                        const EdgeInsets
-                                                                .fromLTRB(
-                                                            0, 80, 0, 80),
-                                                    actions: [
-                                                      TextButton(
-                                                        child: const Text('확인'),
-                                                        onPressed: () {
-                                                          Navigator.of(context)
-                                                              .pop();
+                                                          Navigator.pop(
+                                                              context);
                                                         },
                                                       ),
                                                     ],
@@ -248,30 +217,101 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                                 },
                                               );
                                             } else {
-                                              /* 회원가입 실패 시 */
-                                              showDialog(
-                                                context: context,
-                                                builder:
-                                                    (BuildContext context) {
-                                                  return AlertDialog(
-                                                    content: const Text(
-                                                        "잠시후 다시 시도해주세요"),
-                                                    insetPadding:
-                                                        const EdgeInsets
-                                                                .fromLTRB(
-                                                            0, 80, 0, 80),
-                                                    actions: [
-                                                      TextButton(
-                                                        child: const Text('확인'),
-                                                        onPressed: () {
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        },
-                                                      ),
-                                                    ],
-                                                  );
-                                                },
-                                              );
+                                              int result =
+                                                  await datasource.registerUser(
+                                                      s_number,
+                                                      u_name,
+                                                      id,
+                                                      pass,
+                                                      phone_num,
+                                                      email);
+                                              print(result);
+                                              if (result == 200) {
+                                                showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return AlertDialog(
+                                                      content: const Text(
+                                                          "가입에 성공하였습니다."),
+                                                      insetPadding:
+                                                          const EdgeInsets
+                                                                  .fromLTRB(
+                                                              0, 80, 0, 80),
+                                                      actions: [
+                                                        TextButton(
+                                                          child: const Text(
+                                                              '차량등록하러가기'),
+                                                          onPressed: () {
+                                                            Navigator
+                                                                .pushReplacement(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                  builder: (context) =>
+                                                                      RegisterCarScreen(
+                                                                          userId:
+                                                                              id)),
+                                                            );
+                                                          },
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
+                                                );
+                                              } else if (result == 400) {
+                                                showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return AlertDialog(
+                                                      content: const Text(
+                                                          "이미 등록된 아이디입니다.\n다시 시도해주세요"),
+                                                      insetPadding:
+                                                          const EdgeInsets
+                                                                  .fromLTRB(
+                                                              0, 80, 0, 80),
+                                                      actions: [
+                                                        TextButton(
+                                                          child:
+                                                              const Text('확인'),
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          },
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
+                                                );
+                                              } else {
+                                                /* 회원가입 실패 시 */
+                                                showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return AlertDialog(
+                                                      content: const Text(
+                                                          "잠시후 다시 시도해주세요"),
+                                                      insetPadding:
+                                                          const EdgeInsets
+                                                                  .fromLTRB(
+                                                              0, 80, 0, 80),
+                                                      actions: [
+                                                        TextButton(
+                                                          child:
+                                                              const Text('확인'),
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          },
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
+                                                );
+                                              }
                                             }
                                           },
                                         ),

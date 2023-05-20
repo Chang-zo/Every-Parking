@@ -21,28 +21,35 @@ class ParkingMap extends StatefulWidget {
 }
 
 class _ParkingMapState extends State<ParkingMap> {
-  parkingMapStatues? nowParkingList;
+  late parkingMapStatues nowParkingMapStatus;
+  late List<ParkingArea> nowParkingList;
   var ds = new Datasource();
   String appbarName = "";
 
   @override
   void initState() {
     super.initState();
-    _getParkingLotInfo();
     appbarName = widget.name;
+    _getParkingLotInfo();
   }
 
   void _getParkingLotInfo() async {
-    parkingMapStatues? nowParkingStatusInfo =
-        await ds.nowParkingLotStatus(widget.userId) as parkingMapStatues?;
+    try {
+      parkingMapStatues nowParkingStatusInfo =
+          (await ds.nowParkingLotStatus(widget.userId)) as parkingMapStatues;
 
-    if (nowParkingStatusInfo != null) {
       setState(() {
-        nowParkingList = nowParkingStatusInfo;
+        nowParkingMapStatus = nowParkingStatusInfo;
+        nowParkingList = nowParkingStatusInfo.parkingInfoList;
       });
-    } else {
-      nowParkingList = parkingMapStatues(
-          name: "이게 왜 널이지", total: 10, used: 1, parkingInfoList: []);
+    } catch (e) {
+      nowParkingMapStatus = parkingMapStatues(
+          name: "정보 받아오기 실패ㅐ애ㅐ", total: 10, used: 1, parkingInfoList: []);
+      setState(() {
+        appbarName = nowParkingMapStatus?.name ??
+            "정보 받아오기 실패하면 하라고 한 "
+                "name값도 가져오는데 실패하네 망할";
+      });
     }
   }
 
@@ -62,7 +69,7 @@ class _ParkingMapState extends State<ParkingMap> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
                 child: Text(
-                  '${widget.name} ${nowParkingList?.used}/${nowParkingList?.total}',
+                  '${widget.name} ${nowParkingMapStatus.used}/${nowParkingMapStatus.total}',
                   style: TextStyle(fontSize: 20),
                 ),
               ),

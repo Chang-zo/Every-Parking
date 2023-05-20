@@ -47,15 +47,14 @@ class Datasource {
     );
 
     if (response.statusCode == 200) {
-      print("로그인 성공");
-
-      return 0;
+      print("Datasource 로그인 성공");
+      return 200;
     } else if (response.statusCode == 400) {
-      print("아이디 혹은 비번 오류");
-      return 1;
+      print("Datasource 아이디 혹은 비번 오류");
+      return 400;
     } else {
-      print("로그인 실패");
-      return 1;
+      print("Datasource 로그인 실패");
+      return 0;
     }
   }
 

@@ -14,8 +14,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
   dynamic userInfo = '';
 
   logout() async {
-    await storage.delete(key: 'login');
-    await storage.delete(key: 'carNum');
+    await storage.deleteAll();
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (context) => LoginScreen()));
   }

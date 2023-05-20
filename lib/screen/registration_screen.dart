@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:every_parking/datasource/datasource.dart';
 import 'package:every_parking/screen/main_screen.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -25,77 +24,6 @@ class _RegisterCarScreen extends State<RegisterCarScreen> {
   var modelName; /* 차량 모델 */
 
   var ds = new Datasource();
-
-  static final storage = FlutterSecureStorage();
-  dynamic userCarInfo;
-  void initState() {
-    super.initState();
-
-    // 비동기로 flutter secure storage 정보를 불러오는 작업
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _asyncMethod();
-    });
-  }
-
-  _asyncMethod() async {
-    // read 함수로 key값에 맞는 정보를 불러오고 데이터타입은 String 타입
-    // 데이터가 없을때는 null을 반환
-    userCarInfo = await storage.read(key: 'carNum');
-
-    // user의 자동차 정보가 있다면 로그인 후 들어가는 첫 페이지로 넘어가게 합니다.
-    try {
-      if (userCarInfo != null) {
-        Navigator.pushNamed(context, '/main');
-      } else {
-        MyParkingStatus myParkingStatus =
-            await ds.myParkingStatus(widget.userId);
-        print('해당아이디에 대해 서버에 주차정보가 저장되어있습니다.');
-
-        var val = json.encode({'carNumber': myParkingStatus.carNumber});
-
-        await storage.write(
-          key: 'carNum',
-          value: val,
-        );
-        print(myParkingStatus);
-      }
-    } catch (e) {
-      print('차량등록이 필요합니다');
-    }
-  }
-
-  registAction(id) async {
-    try {
-      final response = await http.post(
-        Uri.parse(APIUrl.carRegiUrl),
-        headers: {'Content-Type': 'application/json', 'userId': id},
-        body: json.encode({'carNumber': carNumber, 'modelName': modelName}),
-      );
-
-      print(response.statusCode);
-      if (response.statusCode == 200) {
-        var val = json.encode({'carNumber': carNumber, 'modelName': modelName});
-
-        await storage.write(
-          key: 'carNum',
-          value: val,
-        );
-
-        print('차량 등록 성공');
-        print(userCarInfo);
-        return 200;
-      } else if (response.statusCode == 400) {
-        print('중복된 차량');
-        return 400;
-      } else {
-        print('차량등록 실패');
-        return 0;
-      }
-    } catch (e) {
-      print("차량등록 catch문 실행");
-      return 1;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -215,8 +143,10 @@ class _RegisterCarScreen extends State<RegisterCarScreen> {
                                                           0x7a, 0xa6))),
                                           child: const Text("등록"),
                                           onPressed: () async {
-                                            int result = await registAction(
-                                                widget.userId);
+                                            int result = await ds.carRegister(
+                                                widget.userId,
+                                                carNumber,
+                                                modelName);
                                             if (result == 200) {
                                               showDialog(
                                                 context: context,
@@ -236,6 +166,8 @@ class _RegisterCarScreen extends State<RegisterCarScreen> {
                                                           Navigator.of(context)
                                                               .pop();
 
+                                                          Navigator.of(context)
+                                                              .pop();
                                                           Navigator.of(context)
                                                               .pop();
                                                         },
