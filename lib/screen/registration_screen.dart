@@ -7,6 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
+import '../Model/parkingstatus.dart';
 import '../datasource/APIUrl.dart';
 
 class RegisterCarScreen extends StatefulWidget {
@@ -22,6 +23,8 @@ class _RegisterCarScreen extends State<RegisterCarScreen> {
   var isChecked = [false, false, false]; /* 약관 */
   var carNumber; /* 차량 번호 */
   var modelName; /* 차량 모델 */
+
+  var ds = new Datasource();
 
   static final storage = FlutterSecureStorage();
   dynamic userCarInfo;
@@ -40,9 +43,23 @@ class _RegisterCarScreen extends State<RegisterCarScreen> {
     userCarInfo = await storage.read(key: 'carNum');
 
     // user의 자동차 정보가 있다면 로그인 후 들어가는 첫 페이지로 넘어가게 합니다.
-    if (userCarInfo != null) {
-      Navigator.pushNamed(context, '/main');
-    } else {
+    try {
+      if (userCarInfo != null) {
+        Navigator.pushNamed(context, '/main');
+      } else {
+        MyParkingStatus myParkingStatus =
+            await ds.myParkingStatus(widget.userId);
+        print('해당아이디에 대해 서버에 주차정보가 저장되어있습니다.');
+
+        var val = json.encode({'carNumber': myParkingStatus.carNumber});
+
+        await storage.write(
+          key: 'carNum',
+          value: val,
+        );
+        print(myParkingStatus);
+      }
+    } catch (e) {
       print('차량등록이 필요합니다');
     }
   }
@@ -80,7 +97,6 @@ class _RegisterCarScreen extends State<RegisterCarScreen> {
     }
   }
 
-  var ds = new Datasource();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -269,9 +285,6 @@ class _RegisterCarScreen extends State<RegisterCarScreen> {
                                                       TextButton(
                                                         child: const Text('확인'),
                                                         onPressed: () {
-                                                          Navigator.of(context)
-                                                              .pop();
-
                                                           Navigator.of(context)
                                                               .pop();
                                                         },

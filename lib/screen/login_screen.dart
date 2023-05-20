@@ -79,7 +79,7 @@ class _LogInState extends State<LoginScreen> {
     userCarInfo = await storage.read(key: 'carNum');
 
     // user의 정보가 있다면 로그인 후 들어가는 첫 페이지로 넘어가게 합니다.
-    if (userInfo != null) {
+    if (userInfo != null && userCarInfo != null) {
       try {
         var parsedJson = json.decode(userInfo);
         userId = parsedJson['userId'];
@@ -109,6 +109,12 @@ class _LogInState extends State<LoginScreen> {
 
       Navigator.pushReplacement(context,
           MaterialPageRoute(builder: (context) => MainScreen(userId: userId)));
+    } else if (userCarInfo == null) {
+      print("로컬에 로그인 정보는 있지만 차량 등록 정보가 없습니다.");
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => RegisterCarScreen(userId: id)));
     } else {
       print('로그인이 필요합니다');
     }
