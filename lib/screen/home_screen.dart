@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:every_parking/datasource/datasource.dart';
 import 'package:every_parking/Model/user.dart';
@@ -20,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreen extends State<HomeScreen> {
+  var test;
   var ds = new Datasource();
   var user = new User();
   var myParkingStatus = new MyParkingStatus();

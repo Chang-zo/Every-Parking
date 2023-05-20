@@ -2,10 +2,8 @@ import 'dart:convert';
 import 'package:every_parking/Model/parkingstatus.dart';
 import 'package:every_parking/datasource/APIUrl.dart';
 import 'package:http/http.dart' as http;
-
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import '../Model/parkingMapStatue.dart';
-import '../Model/parkingarea.dart';
 import '../Model/user.dart';
 import '../Model/parkingLotInfo.dart';
 
@@ -179,4 +177,34 @@ class Datasource {
       return false;
     }
   }
+
+  /* 신고 내용 서버 전송 */
+  Future<bool> reportUser(String title, String contents, List<XFile> imageList, String userId) async {
+
+    print('$userId ');
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse('http://everyparking.co.kr/images/upload'),
+    );
+    /* header에 유저 id 포함해서 전송 */
+    request.headers['userId'] = userId;
+
+    /* XFILE to MultipartFile  */
+    for (var image in imageList) {
+      request.files.add(await http.MultipartFile.fromPath('imageFile',image.path));
+    }
+
+    /* 서버에 전송 */
+    var response = await request.send();
+
+    if(response.statusCode == 200) {
+      print("이미지 전송 성공");
+      return true;
+    }else {
+      print("이미지 전송 실패");
+      return false;
+    }
+  }
+
+
 }

@@ -51,7 +51,9 @@ class _MainScreenState extends State<MainScreen> {
           HomeScreen(
             userId: widget.userId,
           ),
-          ReportScreen(),
+          ReportScreen(
+            userId: widget.userId,
+          ),
           NoticeScreen(),
           MyPageScreen()
         ],
