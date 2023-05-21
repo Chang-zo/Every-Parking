@@ -113,14 +113,14 @@ class Datasource {
   }
 
   /* 주차장 주차 현황 확인 */
-  Future<Iterable<parkingMapStatues>> nowParkingLotStatus(String userId) async {
-    final response = await http.get(Uri.parse(APIUrl.parkingListUrl),
+  Future<parkingMapStatues> nowParkingLotStatus(String userId) async {
+    final response = await http.get(Uri.parse(APIUrl.parkingInfoUrl),
         headers: {'Content-Type': 'application/json', 'userId': userId});
 
     if (response.statusCode == 200) {
-      print(json.decode(response.body));
-      final List<dynamic> parsedJson = jsonDecode(response.body);
-      return parsedJson.map((json) => parkingMapStatues.fromJson(json));
+      print('nowParkingLotStatus : ${json.decode(response.body)}');
+      //final List<dynamic> parsedJson = jsonDecode(response.body);
+      return parkingMapStatues.fromJson(json.decode(response.body));
     } else {
       throw Exception('현재 주차장 정보 받기 실패');
     }

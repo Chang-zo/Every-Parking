@@ -35,13 +35,15 @@ class _ParkingMapState extends State<ParkingMap> {
 
   void _getParkingLotInfo() async {
     try {
-      parkingMapStatues nowParkingStatusInfo =
-          (await ds.nowParkingLotStatus(widget.userId)) as parkingMapStatues;
+
+      /* 서버 요청  */
+      var nowParkingStatusInfo = await ds.nowParkingLotStatus(widget.userId);
 
       setState(() {
         nowParkingMapStatus = nowParkingStatusInfo;
         nowParkingList = nowParkingStatusInfo.parkingInfoList;
       });
+
     } catch (e) {
       nowParkingMapStatus = parkingMapStatues(
           name: "정보 받아오기 실패ㅐ애ㅐ", total: 10, used: 1, parkingInfoList: []);

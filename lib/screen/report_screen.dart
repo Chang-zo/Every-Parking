@@ -140,7 +140,7 @@ class _ImageUploaderState extends State<ImageUploader> {
   List<XFile> _pickedImgs = [];
 
   Future<void> _pickImg() async {
-    final List<XFile>? images = await _picker.pickMultiImage();
+    final List<XFile>? images = await _picker.pickMultiImage(imageQuality: 85);
     if (images != null) {
       setState(() {
         _pickedImgs = images;

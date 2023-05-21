@@ -18,6 +18,7 @@ class parkingMapStatues {
     List<ParkingArea> parkingInfoList = List<ParkingArea>.from(
         json['parkingInfoList'].map((data) => ParkingArea.fromJson(data)));
 
+    print('parkingId : ${parkingInfoList[0].parkingId}');
     return parkingMapStatues(
       name: json['name'],
       total: json['total'],

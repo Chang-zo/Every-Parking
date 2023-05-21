@@ -2,7 +2,7 @@
 
 class ParkingArea {
   var parkingId;
-  bool parkingStatus;
+  var parkingStatus;
 
   ParkingArea({
     this.parkingId,
