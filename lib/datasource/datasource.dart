@@ -106,7 +106,8 @@ class Datasource {
       print(json.decode(response.body));
       print("주차장 현황 받아오기 성공");
 
-      return ParkingLotInfo.fromJson(json.decode(utf8.decode(response.bodyBytes)));
+      return ParkingLotInfo.fromJson(
+          json.decode(utf8.decode(response.bodyBytes)));
     } else {
       throw Exception('현재 주차장 잔여석 정보 받기 실패');
     }
@@ -119,8 +120,8 @@ class Datasource {
 
     if (response.statusCode == 200) {
       print('nowParkingLotStatus : ${json.decode(response.body)}');
-      //final List<dynamic> parsedJson = jsonDecode(response.body);
-      return parkingMapStatues.fromJson(json.decode(response.body));
+      return parkingMapStatues
+          .fromJson(json.decode(utf8.decode(response.bodyBytes)));
     } else {
       throw Exception('현재 주차장 정보 받기 실패');
     }
@@ -183,8 +184,8 @@ class Datasource {
   }
 
   /* 신고 내용 서버 전송 */
-  Future<bool> reportUser(String title, String contents, List<XFile> imageList, String userId) async {
-
+  Future<bool> reportUser(String title, String contents, List<XFile> imageList,
+      String userId) async {
     print('$userId ');
     var request = http.MultipartRequest(
       'POST',
@@ -195,20 +196,19 @@ class Datasource {
 
     /* XFILE to MultipartFile  */
     for (var image in imageList) {
-      request.files.add(await http.MultipartFile.fromPath('imageFile',image.path));
+      request.files
+          .add(await http.MultipartFile.fromPath('imageFile', image.path));
     }
 
     /* 서버에 전송 */
     var response = await request.send();
 
-    if(response.statusCode == 200) {
+    if (response.statusCode == 200) {
       print("이미지 전송 성공");
       return true;
-    }else {
+    } else {
       print("이미지 전송 실패");
       return false;
     }
   }
-
-
 }
