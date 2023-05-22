@@ -3,15 +3,27 @@ import 'package:flutter_svg/svg.dart';
 
 class MyParkingInfo extends StatefulWidget {
   final String parkingNum;
-  const MyParkingInfo(this.parkingNum, {Key? key}) : super(key: key);
+  final int myParkingNum;
+  const MyParkingInfo(this.parkingNum, this.myParkingNum, {Key? key})
+      : super(key: key);
 
   @override
   State<MyParkingInfo> createState() => _MyParkingInfoState();
 }
 
 class _MyParkingInfoState extends State<MyParkingInfo> {
-  //해당 주차칸이 사용자가 맞는가?
-  bool isMe = false;
+  //주차 칸이 0이면 주차하지 않은것
+  //주차 칸이 0이 아니라면, 해당 칸에 주차를 한것
+  int myParkingNum = 0;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    setState(() {
+      myParkingNum = widget.myParkingNum;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +108,7 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
                           ),
                         ),
                       ),
-                      isMe == true
+                      myParkingNum != 0
                           ? ButtonBar(
                               alignment: MainAxisAlignment.spaceAround,
                               children: [

@@ -68,6 +68,7 @@ class _ParkingMapState extends State<ParkingMap> {
           name: "정보 받아오기 실패ㅐ애ㅐ", total: 10, used: 1, parkingInfoList: []);
       setState(() {
         appbarName = nowParkingMapStatus.name;
+        nowParkingList = [];
       });
     }
   }
@@ -75,6 +76,7 @@ class _ParkingMapState extends State<ParkingMap> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          toolbarHeight: MediaQuery.of(context).size.height * 0.08,
           title: Text(
             appbarName,
             style: TextStyle(color: Colors.white),
@@ -87,51 +89,81 @@ class _ParkingMapState extends State<ParkingMap> {
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-                child: Text(
-                  '${widget.name} ${nowParkingMapStatus.used}/${nowParkingMapStatus.total}',
-                  style: TextStyle(fontSize: 20),
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.03,
+                  child: Text(
+                    '${widget.name} ${nowParkingMapStatus.used}/${nowParkingMapStatus.total}',
+                    style: TextStyle(fontSize: 20),
+                  ),
                 ),
               ),
               Expanded(
-                  child: GridView.builder(
-                scrollDirection: Axis.vertical,
-                itemCount: nowParkingList.length + 58, // 컨테이너와 사이즈박스 총 개수
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 19, // 가로로 19개씩 배치
+                  child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(
+                  //height: MediaQuery.of(context).size.height * 0.5,
+                  width: MediaQuery.of(context).size.width * 2.5,
+                  child: nowParkingList.isEmpty
+                      ? Container(
+                          width: double.infinity,
+                          height: double.infinity,
+                          child:
+                              const Center(child: CircularProgressIndicator()),
+                        ) // 데이터 로딩 중 표시
+                      : GridView.count(
+                          shrinkWrap: true, // SingleChildScrollView에 맞게 크기 조정
+                          crossAxisCount: 19,
+                          childAspectRatio: (0.5 / 1),
+                          children: List.generate(nowParkingList.length + 58,
+                              (index) {
+                            if (index == 95) {
+                              // 출구
+                              return Center(
+                                child: Container(
+                                  width: double.infinity, // 또는 원하는 너비 값
+                                  height: double.infinity,
+                                  alignment: Alignment.center,
+                                  color: Colors.blueGrey,
+                                  child: Text(
+                                    "출구",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              );
+                            } else if (index == 96) {
+                              // 입구
+                              return Center(
+                                child: Container(
+                                  width: double.infinity, // 또는 원하는 너비 값
+                                  height: double.infinity,
+                                  alignment: Alignment.center,
+                                  color: Colors.blueGrey,
+                                  child: Text(
+                                    "입구",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              );
+                            } else if (yellow.contains(index)) {
+                              return Container(
+                                color: Colors.yellow,
+                              );
+                            } else if (blink.contains(index) ||
+                                19 <= index && index <= 37 ||
+                                76 <= index && index <= 94) {
+                              return SizedBox();
+                            } else {
+                              parkingNum(index);
+                              return SizedBox(
+                                child: ParkingCell(
+                                  index: parkNum,
+                                  nowParkingList: nowParkingList,
+                                ),
+                              );
+                            }
+                          }),
+                        ),
                 ),
-                itemBuilder: (BuildContext context, int index) {
-                  // index를 기준으로 컨테이너와 사이즈박스를 번갈아가며 배치
-                  if (index == 95) {
-                    //출구
-                    return Container(
-                      width: 100,
-                      child: Text("출구"),
-                    );
-                  } else if (index == 96) {
-                    //입구
-                    return Container(
-                      width: 100,
-                      child: Text("입구"),
-                    );
-                  } else if (yellow.contains(index)) {
-                    return Container(
-                      color: Colors.yellow,
-                      width: 100,
-                    );
-                  } else if (blink.contains(index) ||
-                      19 <= index && index <= 37 ||
-                      76 <= index && index <= 94) {
-                    return Container(
-                      width: 100,
-                    );
-                  } else {
-                    parkingNum(index);
-                    return SizedBox(
-                        width: 100,
-                        child: ParkingCell(
-                            index: parkNum, nowParkingList: nowParkingList));
-                  }
-                },
               ))
             ],
           ),
@@ -139,7 +171,7 @@ class _ParkingMapState extends State<ParkingMap> {
   }
 }
 
-class ParkingCell extends StatelessWidget {
+class ParkingCell extends StatefulWidget {
   final int index;
   final List<ParkingArea> nowParkingList;
 
@@ -150,10 +182,37 @@ class ParkingCell extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<ParkingCell> createState() => _ParkingCellState(index, nowParkingList);
+}
+
+class _ParkingCellState extends State<ParkingCell> {
+  final int index;
+  final List<ParkingArea> nowParkingList;
+
+  _ParkingCellState(this.index, this.nowParkingList);
+
+  bool isMe = false;
+  int myParkingNum = 0;
+
+  void parkingStatusChange(parkingStatus, index) {
+    if (parkingStatus == "UNAVAILABLE") {
+      setState(() {
+        nowParkingList[index].parkingStatus = "AVAILABLE";
+        myParkingNum = 0;
+      });
+    } else if (parkingStatus == "AVAILABLE") {
+      setState(() {
+        nowParkingList[index].parkingStatus = "UNAVAILABLE";
+        myParkingNum = index;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (nowParkingList[index].parkingStatus == "UNAVAILABLE") {
+        if (nowParkingList[index].parkingStatus == "AVAILABLE") {
           showDialog(
             context: context,
             builder: (BuildContext context) {
@@ -164,7 +223,8 @@ class ParkingCell extends StatelessWidget {
                   TextButton(
                     child: Text('확인'),
                     onPressed: () {
-                      nowParkingList[index].parkingStatus = "UNAVAILABLE";
+                      parkingStatusChange(
+                          nowParkingList[index].parkingStatus, index);
                       Navigator.of(context).pop();
                     },
                   ),
@@ -181,7 +241,7 @@ class ParkingCell extends StatelessWidget {
         } else {
           showDialog(
             context: context,
-            builder: (context) => MyParkingInfo("$index번"),
+            builder: (context) => MyParkingInfo("$index번", myParkingNum),
           );
         }
       },

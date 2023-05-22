@@ -56,17 +56,19 @@ class _LogInState extends State<LoginScreen> {
         );
         if (response.statusCode == 200) {
           print("로컬데이터 로그인성공");
+          id = userId;
+          print(userInfo);
+
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => MainScreen(userId: userId)));
         } else {
           print("로컬데이터 로그인실패");
         }
       } catch (e) {
         print("로컬 데이터로 로그인중 예외발생");
       }
-      id = userId;
-      print(userInfo);
-
-      Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (context) => MainScreen(userId: userId)));
     } else {
       print('로그인이 필요합니다');
     }

@@ -1,5 +1,4 @@
 /* 주차장 맵 구성하는데 쓰이는 것 */
-import 'dart:convert';
 import 'package:every_parking/Model/parkingarea.dart';
 
 class parkingMapStatues {

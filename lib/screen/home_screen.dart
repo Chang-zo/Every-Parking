@@ -22,7 +22,7 @@ class _HomeScreen extends State<HomeScreen> {
   var test;
   var ds = new Datasource();
   var user = new User();
-  var myParkingStatus = new MyParkingStatus();
+  var myParkingStatus = MyParkingStatus(parkingId: 0, remain: 0, carNumber: "");
   late List<ParkingLotInfo> nowParkingList;
 
   int time_h = 0;
@@ -46,7 +46,7 @@ class _HomeScreen extends State<HomeScreen> {
     try {
       User userInfo = await ds.userInfo(widget.userId);
       print("유저정보 가져오기 try문");
-      print(userInfo);
+      print(userInfo.studentName);
       setState(() {
         user.studentName = userInfo.studentName;
         user.status = userInfo.status;
@@ -58,7 +58,7 @@ class _HomeScreen extends State<HomeScreen> {
       });
 
       print("유저정보 가져오기 catch문");
-      print(user);
+      print(user.studentName);
     }
   }
 
@@ -92,10 +92,10 @@ class _HomeScreen extends State<HomeScreen> {
 
   /*주차장 상태 가져오기*/
   void _getParkingLotInfo() async {
-    ParkingLotInfo nowParkingStatusInfo =
-        await ds.nowParking(widget.userId);
+    ParkingLotInfo nowParkingStatusInfo = await ds.nowParking(widget.userId);
 
-    print('home/ ${nowParkingStatusInfo.total},${nowParkingStatusInfo.used},${nowParkingStatusInfo.name}');
+    print(
+        'home/ ${nowParkingStatusInfo.total},${nowParkingStatusInfo.used},${nowParkingStatusInfo.name}');
 
     setState(() {
       nowParkingList.add(nowParkingStatusInfo);
@@ -103,11 +103,11 @@ class _HomeScreen extends State<HomeScreen> {
   }
 
   void _startParkingTimer() {
-    Timer.periodic(Duration(minutes: 1), (timer) {
+    Timer.periodic(const Duration(minutes: 1), (timer) {
       i--;
       if (myParkingStatus.remain == 0) {
         setState(() {
-          myParkingStatus.remain = null;
+          myParkingStatus.remain = 0;
           user.status = false;
         });
 
@@ -266,9 +266,8 @@ class _HomeScreen extends State<HomeScreen> {
                                             borderRadius: BorderRadius.all(
                                                 Radius.circular(10)),
                                             child: LinearProgressIndicator(
-                                              value: (
-                                                      nowParkingList[index]
-                                                          .used /
+                                              value: (nowParkingList[index]
+                                                      .used /
                                                   nowParkingList[index].total),
                                               valueColor:
                                                   AlwaysStoppedAnimation<Color>(
@@ -278,8 +277,7 @@ class _HomeScreen extends State<HomeScreen> {
                                             ),
                                           ),
                                         ),
-                                        Text(
-                                            (nowParkingList[index].used)
+                                        Text((nowParkingList[index].used)
                                                 .toString() +
                                             "/" +
                                             nowParkingList[index]
@@ -450,7 +448,10 @@ class _HomeScreen extends State<HomeScreen> {
                                                 showDialog(
                                                   context: context,
                                                   builder: (context) =>
-                                                      MyParkingInfo("번"),
+                                                      MyParkingInfo(
+                                                          "번",
+                                                          myParkingStatus
+                                                              .parkingId),
                                                 );
                                               },
                                               child: Row(
@@ -484,7 +485,10 @@ class _HomeScreen extends State<HomeScreen> {
                                                 showDialog(
                                                   context: context,
                                                   builder: (context) =>
-                                                      MyParkingInfo("번"),
+                                                      MyParkingInfo(
+                                                          "번",
+                                                          myParkingStatus
+                                                              .parkingId),
                                                 );
                                               },
                                               child: Row(
