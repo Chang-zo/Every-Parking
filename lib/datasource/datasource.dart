@@ -119,7 +119,8 @@ class Datasource {
         headers: {'Content-Type': 'application/json', 'userId': userId});
 
     if (response.statusCode == 200) {
-      print('nowParkingLotStatus : ${json.decode(response.body)}');
+      print(
+          'nowParkingLotStatus : ${json.decode(utf8.decode(response.bodyBytes))}');
       return parkingMapStatues
           .fromJson(json.decode(utf8.decode(response.bodyBytes)));
     } else {

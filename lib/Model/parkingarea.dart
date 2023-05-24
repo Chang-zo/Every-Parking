@@ -1,11 +1,11 @@
 //int parkingId, String parkingStatus
 
 class ParkingArea {
-  var parkingId;
-  var parkingStatus;
+  int parkingId;
+  String parkingStatus;
 
   ParkingArea({
-    this.parkingId,
+    required this.parkingId,
     required this.parkingStatus,
   });
 

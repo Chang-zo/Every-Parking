@@ -9,6 +9,7 @@ import '../Model/parkingstatus.dart';
 import '../Model/user.dart';
 import '../datasource/datasource.dart';
 import 'package:every_parking/screen/my_parking_status.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 //주차장 칸 관련해서 수정하려면 ParkingMap클래스 말고 젤 아래에 있는 _ParkingCellState 건드리면 됨
 class ParkingMap extends StatefulWidget {
@@ -23,10 +24,12 @@ class ParkingMap extends StatefulWidget {
 
 class _ParkingMapState extends State<ParkingMap> {
   late parkingMapStatues nowParkingMapStatus;
-  late List<ParkingArea> nowParkingList;
+  List<ParkingArea> nowParkingList = [
+    ParkingArea(parkingStatus: "USED", parkingId: 0)
+  ];
   var ds = new Datasource();
   String appbarName = "";
-  int parkId = 1;
+  int parkId = 0;
 
   List<int> yellow = [2, 9, 16, 40, 54, 59, 73, 97, 104, 111];
   List<int> blink = [38, 39, 55, 56, 57, 58, 74, 75];
@@ -41,14 +44,14 @@ class _ParkingMapState extends State<ParkingMap> {
       used: 0,
       parkingInfoList: [],
     );
-    parkId = 1;
-    nowParkingList = [];
+    nowParkingList = [ParkingArea(parkingStatus: "USED", parkingId: 0)];
     _getParkingLotInfo();
   }
 
   void parkingNum(index) async {
     if (index == 0) {
       parkId = 1;
+      print("index가 0이라는데?");
     } else {
       parkId++;
       print(parkId);
@@ -62,7 +65,9 @@ class _ParkingMapState extends State<ParkingMap> {
 
       setState(() {
         nowParkingMapStatus = nowParkingStatusInfo;
-        nowParkingList = nowParkingStatusInfo.parkingInfoList;
+        nowParkingList.addAll(nowParkingStatusInfo.parkingInfoList);
+        print("_getParkingLotInfo 실행");
+        print(nowParkingList.length);
       });
     } catch (e) {
       nowParkingMapStatus = parkingMapStatues(
@@ -108,7 +113,7 @@ class _ParkingMapState extends State<ParkingMap> {
                   //정보 불러오는 동안 nowParkingList가 비어있기 때문에 오류 발생
                   //비어있는 동안 CircularProgressIndicator 띄우면서 대기하다가
                   //정보 다 불러와지면 주차장 맵 생성
-                  child: nowParkingList.isEmpty
+                  child: nowParkingList.length == 1
                       ? Container(
                           child: const Center(
                               child:
@@ -118,7 +123,7 @@ class _ParkingMapState extends State<ParkingMap> {
                           crossAxisCount: 19,
                           childAspectRatio: (0.5 / 1),
                           children: List.generate(
-                              nowParkingList.length + 58, //주차 못하는 모든 칸의 수 58개
+                              nowParkingList.length + 57, //주차 못하는 모든 칸의 수 57개
                               (index) {
                             if (index == 95) {
                               // 출구
@@ -157,6 +162,7 @@ class _ParkingMapState extends State<ParkingMap> {
                                 76 <= index && index <= 94) {
                               return const SizedBox();
                             } else {
+                              //parkingNum 1씩 증가
                               parkingNum(index);
                               return SizedBox(
                                 child: ParkingCell(
@@ -201,25 +207,16 @@ class _ParkingCellState extends State<ParkingCell> {
   final int parkId;
   final List<ParkingArea> nowParkingList;
   final String parkingLotName;
+  static final storage = FlutterSecureStorage();
 
   _ParkingCellState(
       this.parkId, this.nowParkingList, this.userId, this.parkingLotName);
 
-  bool isMe = false;
-  int myParkingNum = 0;
-
   void parkingStatusChange(parkingStatus, parkId) {
-    if (parkingStatus == "USED") {
+    if (parkingStatus == "AVAILABLE") {
       setState(() {
-        nowParkingList[parkId - 1].parkingStatus = "AVAILABLE";
-        myParkingNum = 0;
-      });
-    } else if (parkingStatus == "AVAILABLE") {
-      setState(() {
-        nowParkingList[parkId - 1].parkingStatus = "USED";
-        myParkingNum = parkId;
+        nowParkingList[parkId].parkingStatus = "USED";
         print("parkingStatusChange 내부");
-        print(myParkingNum);
       });
     }
   }
@@ -247,7 +244,14 @@ class _ParkingCellState extends State<ParkingCell> {
                 ],
               );
             });
-        parkingStatusChange(nowParkingList[parkId - 1].parkingStatus, parkId);
+        parkingStatusChange(nowParkingList[parkId].parkingStatus, parkId);
+
+        var val = json.encode({'parkId': parkId});
+
+        await storage.write(
+          key: 'myParkingLot',
+          value: val,
+        );
       } else {
         showDialog(
             context: context,
@@ -294,7 +298,7 @@ class _ParkingCellState extends State<ParkingCell> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (nowParkingList[parkId - 1].parkingStatus == "AVAILABLE") {
+        if (nowParkingList[parkId].parkingStatus == "AVAILABLE") {
           showDialog(
             context: context,
             builder: (BuildContext context) {
@@ -320,17 +324,16 @@ class _ParkingCellState extends State<ParkingCell> {
           );
         } else {
           print("myParkingNum");
-          print(myParkingNum);
           showDialog(
               context: context,
               builder: (context) =>
-                  MyParkingInfo("$parkId번", myParkingNum, widget.userId));
+                  MyParkingInfo("$parkId번", widget.userId, parkId));
         }
       },
       child: Container(
         width: 100,
         height: 50,
-        color: nowParkingList[parkId - 1].parkingStatus == "USED"
+        color: nowParkingList[parkId].parkingStatus == "USED"
             ? Colors.red
             : Colors.grey,
         child: Center(

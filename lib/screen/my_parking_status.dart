@@ -1,12 +1,15 @@
+import 'dart:convert';
+
 import 'package:every_parking/datasource/datasource.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class MyParkingInfo extends StatefulWidget {
   final String parkingNum;
-  final int parkingId;
   final String userId;
-  const MyParkingInfo(this.parkingNum, this.parkingId, this.userId, {Key? key})
+  final int parkingId;
+  const MyParkingInfo(this.parkingNum, this.userId, this.parkingId, {Key? key})
       : super(key: key);
 
   @override
@@ -14,17 +17,40 @@ class MyParkingInfo extends StatefulWidget {
 }
 
 class _MyParkingInfoState extends State<MyParkingInfo> {
-  //주차 칸이 0이면 주차하지 않은것
-  //주차 칸이 0이 아니라면, 해당 칸에 ㅊ주차를 한것
+  static final storage = FlutterSecureStorage();
+  dynamic parkingInfo = '';
   int myParkingId = 0;
+  bool isMe = false;
   @override
   void initState() {
-    print(widget.parkingId);
+    print("MyParkingInfo의 initState 실행");
     super.initState();
-    setState(() {
-      myParkingId = widget.parkingId;
-    });
+    myParkingInfo();
+  }
+
+  Future<void> myParkingInfo() async {
+    parkingInfo = await storage.read(key: 'myParkingLot');
+    if (parkingInfo != null) {
+      print('주차등록 정보가 존재합니다.');
+      var parsedJson = json.decode(parkingInfo);
+      myParkingId = parsedJson['parkId'];
+    } else {
+      print('주차정보가 없습니다.');
+      myParkingId = 0;
+    }
+    print("로컬에 등록된 주차정보");
     print(myParkingId);
+    print(widget.parkingId);
+    print(myParkingId == widget.parkingId);
+    if (myParkingId == widget.parkingId) {
+      setState(() {
+        isMe = true;
+      });
+    } else {
+      setState(() {
+        isMe = false;
+      });
+    }
   }
 
   @override
@@ -110,7 +136,7 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
                           ),
                         ),
                       ),
-                      myParkingId != 0
+                      isMe == true
                           ? ButtonBar(
                               alignment: MainAxisAlignment.spaceAround,
                               children: [
@@ -283,32 +309,6 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
                                             height: 20,
                                           ),
                                           Text("사용자 신고")
-                                        ],
-                                      )),
-                                ),
-                                SizedBox(
-                                  width: 150,
-                                  height: 40,
-                                  child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Color.fromARGB(
-                                            0xFF, 0x2F, 0x64, 0x96),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(15.0),
-                                        ),
-                                      ),
-                                      onPressed: () {},
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceAround,
-                                        children: [
-                                          SvgPicture.asset(
-                                            'assets/icons/white/custom.plus.app.svg',
-                                            width: 20,
-                                            height: 20,
-                                          ),
-                                          Text("쪽지보내기")
                                         ],
                                       )),
                                 ),

@@ -56,7 +56,7 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                         Padding(
                           padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
                           child: Text(
-                            "살려줘",
+                            "회원가입",
                             style: TextStyle(
                               fontSize: 20,
                             ),

@@ -36,7 +36,7 @@ class _HomeScreen extends State<HomeScreen> {
     //_startTimer();
     _getParkingLotInfo();
     nowParkingList = [
-      ParkingLotInfo(name: "동문주차장", used: 15, total: 56),
+      ParkingLotInfo(name: "동문주차장", used: 65, total: 106),
       ParkingLotInfo(name: "남문주차장", used: 13, total: 19),
     ];
   }
@@ -72,6 +72,7 @@ class _HomeScreen extends State<HomeScreen> {
     }
 
     try {
+      print("내 자동차 정보 가져오기 try 문");
       MyParkingStatus myParkingStatusInfo =
           await Datasource().myParkingStatus(widget.userId);
 
@@ -82,6 +83,7 @@ class _HomeScreen extends State<HomeScreen> {
         i = myParkingStatus.remain!;
       });
     } catch (e) {
+      print("내 자동차 정보 가져오기 catch 문");
       setState(() {
         myParkingStatus.parkingId = 123;
         myParkingStatus.remain = i;
@@ -100,6 +102,7 @@ class _HomeScreen extends State<HomeScreen> {
         'home/ ${nowParkingStatusInfo.total},${nowParkingStatusInfo.used},${nowParkingStatusInfo.name}');
 
     setState(() {
+      nowParkingList.removeAt(1);
       nowParkingList.add(nowParkingStatusInfo);
     });
   }
@@ -131,15 +134,8 @@ class _HomeScreen extends State<HomeScreen> {
     return Text("${time_h.toString()}시간\n${time_m.toString()}분");
   }
 
-  Future<void> _refresh() {
-    setState(() {
-      //서버 연결 후 아래 주석처리 된거 실행시키기!
-      //nowParkingList = nowParkingStatusInfo;
-      nowParkingList.add(
-        ParkingLotInfo(name: "동문주차장", used: 15, total: 56),
-      );
-    });
-    return Future<void>.value();
+  Future<void> _refresh() async {
+    _getParkingLotInfo();
   }
 
   void isRegist() {}
@@ -452,9 +448,9 @@ class _HomeScreen extends State<HomeScreen> {
                                                   builder: (context) =>
                                                       MyParkingInfo(
                                                           "번",
+                                                          widget.userId,
                                                           myParkingStatus
-                                                              .parkingId,
-                                                          widget.userId),
+                                                              .parkingId),
                                                 );
                                               },
                                               child: Row(
@@ -490,9 +486,9 @@ class _HomeScreen extends State<HomeScreen> {
                                                   builder: (context) =>
                                                       MyParkingInfo(
                                                           "번",
+                                                          widget.userId,
                                                           myParkingStatus
-                                                              .parkingId,
-                                                          widget.userId),
+                                                              .parkingId),
                                                 );
                                               },
                                               child: Row(
