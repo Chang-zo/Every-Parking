@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 class MyParkingInfo extends StatefulWidget {
-  final String userId;
   final String parkingNum;
   final int parkingId;
+  final String userId;
   const MyParkingInfo(this.parkingNum, this.parkingId, this.userId, {Key? key})
       : super(key: key);
 
@@ -17,13 +17,14 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
   //주차 칸이 0이면 주차하지 않은것
   //주차 칸이 0이 아니라면, 해당 칸에 ㅊ주차를 한것
   int myParkingId = 0;
-
   @override
   void initState() {
+    print(widget.parkingId);
     super.initState();
     setState(() {
       myParkingId = widget.parkingId;
     });
+    print(myParkingId);
   }
 
   @override

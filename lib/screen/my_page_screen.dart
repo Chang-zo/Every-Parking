@@ -26,7 +26,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => LoginScreen()));
     } else {
-      print('로그인 중');
+      //print('로그인 중');
     }
   }
 

@@ -26,7 +26,7 @@ class _ParkingMapState extends State<ParkingMap> {
   late List<ParkingArea> nowParkingList;
   var ds = new Datasource();
   String appbarName = "";
-  int parkId = 0;
+  int parkId = 1;
 
   List<int> yellow = [2, 9, 16, 40, 54, 59, 73, 97, 104, 111];
   List<int> blink = [38, 39, 55, 56, 57, 58, 74, 75];
@@ -41,14 +41,14 @@ class _ParkingMapState extends State<ParkingMap> {
       used: 0,
       parkingInfoList: [],
     );
-    parkId = 0;
+    parkId = 1;
     nowParkingList = [];
     _getParkingLotInfo();
   }
 
   void parkingNum(index) async {
     if (index == 0) {
-      parkId = 0;
+      parkId = 1;
     } else {
       parkId++;
       print(parkId);
@@ -163,6 +163,7 @@ class _ParkingMapState extends State<ParkingMap> {
                                   parkId: parkId,
                                   nowParkingList: nowParkingList,
                                   userId: widget.userId,
+                                  parkingLotName: widget.name,
                                 ),
                               );
                             }
@@ -180,46 +181,52 @@ class ParkingCell extends StatefulWidget {
   final int parkId;
   final List<ParkingArea> nowParkingList;
   final String userId;
+  final String parkingLotName;
 
   const ParkingCell({
     Key? key,
     required this.parkId,
     required this.nowParkingList,
     required this.userId,
+    required this.parkingLotName,
   }) : super(key: key);
 
   @override
   State<ParkingCell> createState() =>
-      _ParkingCellState(parkId, nowParkingList, userId);
+      _ParkingCellState(parkId, nowParkingList, userId, parkingLotName);
 }
 
 class _ParkingCellState extends State<ParkingCell> {
   final String userId;
   final int parkId;
   final List<ParkingArea> nowParkingList;
+  final String parkingLotName;
 
-  _ParkingCellState(this.parkId, this.nowParkingList, this.userId);
+  _ParkingCellState(
+      this.parkId, this.nowParkingList, this.userId, this.parkingLotName);
 
   bool isMe = false;
   int myParkingNum = 0;
 
   void parkingStatusChange(parkingStatus, parkId) {
-    if (parkingStatus == "UNAVAILABLE") {
+    if (parkingStatus == "USED") {
       setState(() {
-        nowParkingList[parkId].parkingStatus = "AVAILABLE";
+        nowParkingList[parkId - 1].parkingStatus = "AVAILABLE";
         myParkingNum = 0;
       });
     } else if (parkingStatus == "AVAILABLE") {
       setState(() {
-        nowParkingList[parkId].parkingStatus = "UNAVAILABLE";
+        nowParkingList[parkId - 1].parkingStatus = "USED";
         myParkingNum = parkId;
+        print("parkingStatusChange 내부");
+        print(myParkingNum);
       });
     }
   }
 
-  Future<void> parkingLotRent() async {
+  Future<void> parkingLotRent(id, parkingLotId) async {
     try {
-      bool result = await Datasource().parkingLotRent(userId, parkId);
+      bool result = await Datasource().parkingLotRent(id, parkingLotId);
       if (result) {
         print("주차 성공!!!!");
         showDialog(
@@ -240,7 +247,7 @@ class _ParkingCellState extends State<ParkingCell> {
                 ],
               );
             });
-        parkingStatusChange(nowParkingList[parkId].parkingStatus, parkId);
+        parkingStatusChange(nowParkingList[parkId - 1].parkingStatus, parkId);
       } else {
         showDialog(
             context: context,
@@ -267,7 +274,7 @@ class _ParkingCellState extends State<ParkingCell> {
           barrierDismissible: true, // 바깥 영역 터치시 닫을지 여부
           builder: (BuildContext context) {
             return AlertDialog(
-              content: const Text("서버와의 연결이 원활하지 않습니다.\n잠시 후 다시 시도해주세요"),
+              content: const Text("주차장 입장 후 다시 시도하거나\n관리자에게 문의해주세요"),
               insetPadding: const EdgeInsets.fromLTRB(0, 80, 0, 80),
               actions: [
                 TextButton(
@@ -287,7 +294,7 @@ class _ParkingCellState extends State<ParkingCell> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (nowParkingList[parkId].parkingStatus == "AVAILABLE") {
+        if (nowParkingList[parkId - 1].parkingStatus == "AVAILABLE") {
           showDialog(
             context: context,
             builder: (BuildContext context) {
@@ -298,7 +305,7 @@ class _ParkingCellState extends State<ParkingCell> {
                   TextButton(
                     child: Text('확인'),
                     onPressed: () async {
-                      parkingLotRent();
+                      parkingLotRent(userId, parkId);
                     },
                   ),
                   TextButton(
@@ -312,17 +319,18 @@ class _ParkingCellState extends State<ParkingCell> {
             },
           );
         } else {
+          print("myParkingNum");
+          print(myParkingNum);
           showDialog(
-            context: context,
-            builder: (context) =>
-                MyParkingInfo("$parkId번", myParkingNum, widget.userId),
-          );
+              context: context,
+              builder: (context) =>
+                  MyParkingInfo("$parkId번", myParkingNum, widget.userId));
         }
       },
       child: Container(
         width: 100,
         height: 50,
-        color: nowParkingList[parkId].parkingStatus == "UNAVAILABLE"
+        color: nowParkingList[parkId - 1].parkingStatus == "USED"
             ? Colors.red
             : Colors.grey,
         child: Center(

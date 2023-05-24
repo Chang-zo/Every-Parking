@@ -87,9 +87,10 @@ class _LogInState extends State<LoginScreen> {
         );
 
         print("로그인 성공!!!!!!!");
-
+        print(id);
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) => MainScreen(userId: id)));
+        print(id);
       } else if (login_result == 400) {
         print("아이디 혹은 비번 오류");
         showDialog(

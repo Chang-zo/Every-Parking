@@ -1,9 +1,9 @@
 /* 서버와의 통신 url */
 class APIUrl {
-  //static const String _baseUrl = 'http://everyparking.co.kr/app';
+  static const String _baseUrl = 'http://everyparking.co.kr/app';
 
   //승환선배 개인 서버 (everyparking 서버로 로그인이 안되서 임시로 작업)
-  static const String _baseUrl = 'http://13.125.33.177:8083/app';
+  //static const String _baseUrl = 'http://13.124.225.100:8083/app';
 
   static String get joinUrl => '$_baseUrl/member/join';
   static String get loginUrl => '$_baseUrl/member/login';

@@ -58,16 +58,16 @@ class Datasource {
 
   /* 홈화면 유저 정보 */
   Future<User> userInfo(String userId) async {
+    print("userInfo 함수 실행");
     final response = await http.get(
       Uri.parse(APIUrl.userInfoUrl),
       headers: {'Content-Type': 'application/json', 'userId': userId},
     );
 
+    print("userInfo 서벼 데이터 가져오기 성공");
     if (response.statusCode == 200) {
+      print("userInfo 반응 200");
       /*TODO 임시 - 인코딩 해결*/
-      String userName = json.decode(utf8.decode(response.bodyBytes));
-      print(userName);
-      // print(json.decode(response.body));
 
       var tmp = User.fromJson(json.decode(utf8.decode(response.bodyBytes)));
       print("홈화면 유저 정보 받아오기 성공 ");

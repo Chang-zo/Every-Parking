@@ -44,8 +44,10 @@ class _HomeScreen extends State<HomeScreen> {
   /* 유저 가져오기 */
   void _getUserInfo() async {
     try {
+      print("유저 가져오기 시도");
       User userInfo = await ds.userInfo(widget.userId);
       print("유저정보 가져오기 try문");
+      print(widget.userId);
       print(userInfo.studentName);
       setState(() {
         user.studentName = userInfo.studentName;
@@ -58,7 +60,7 @@ class _HomeScreen extends State<HomeScreen> {
       });
 
       print("유저정보 가져오기 catch문");
-      print(user.studentName);
+      print(widget.userId);
     }
   }
 
