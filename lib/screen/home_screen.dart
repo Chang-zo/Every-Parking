@@ -451,7 +451,8 @@ class _HomeScreen extends State<HomeScreen> {
                                                       MyParkingInfo(
                                                           "번",
                                                           myParkingStatus
-                                                              .parkingId),
+                                                              .parkingId,
+                                                          widget.userId),
                                                 );
                                               },
                                               child: Row(
@@ -488,7 +489,8 @@ class _HomeScreen extends State<HomeScreen> {
                                                       MyParkingInfo(
                                                           "번",
                                                           myParkingStatus
-                                                              .parkingId),
+                                                              .parkingId,
+                                                          widget.userId),
                                                 );
                                               },
                                               child: Row(

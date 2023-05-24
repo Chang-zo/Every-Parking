@@ -1,10 +1,12 @@
+import 'package:every_parking/datasource/datasource.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 class MyParkingInfo extends StatefulWidget {
+  final String userId;
   final String parkingNum;
-  final int myParkingNum;
-  const MyParkingInfo(this.parkingNum, this.myParkingNum, {Key? key})
+  final int parkingId;
+  const MyParkingInfo(this.parkingNum, this.parkingId, this.userId, {Key? key})
       : super(key: key);
 
   @override
@@ -13,15 +15,14 @@ class MyParkingInfo extends StatefulWidget {
 
 class _MyParkingInfoState extends State<MyParkingInfo> {
   //주차 칸이 0이면 주차하지 않은것
-  //주차 칸이 0이 아니라면, 해당 칸에 주차를 한것
-  int myParkingNum = 0;
+  //주차 칸이 0이 아니라면, 해당 칸에 ㅊ주차를 한것
+  int myParkingId = 0;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     setState(() {
-      myParkingNum = widget.myParkingNum;
+      myParkingId = widget.parkingId;
     });
   }
 
@@ -108,7 +109,7 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
                           ),
                         ),
                       ),
-                      myParkingNum != 0
+                      myParkingId != 0
                           ? ButtonBar(
                               alignment: MainAxisAlignment.spaceAround,
                               children: [
@@ -124,7 +125,93 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
                                               BorderRadius.circular(15.0),
                                         ),
                                       ),
-                                      onPressed: () {},
+                                      onPressed: () async {
+                                        try {
+                                          if (await Datasource()
+                                              .parkingLotReturn(
+                                                  widget.userId, myParkingId)) {
+                                            print("반납 성공!!!!");
+                                            showDialog(
+                                                context: context,
+                                                barrierDismissible:
+                                                    true, // 바깥 영역 터치시 닫을지 여부
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return AlertDialog(
+                                                    content: const Text(
+                                                        "주차 반납이 완료되었습니다."),
+                                                    insetPadding:
+                                                        const EdgeInsets
+                                                                .fromLTRB(
+                                                            0, 80, 0, 80),
+                                                    actions: [
+                                                      TextButton(
+                                                        child: const Text('확인'),
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                      ),
+                                                    ],
+                                                  );
+                                                });
+                                          } else {
+                                            showDialog(
+                                                context: context,
+                                                barrierDismissible:
+                                                    true, // 바깥 영역 터치시 닫을지 여부
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return AlertDialog(
+                                                    content: const Text(
+                                                        "주차반납에 실패했습니다."),
+                                                    insetPadding:
+                                                        const EdgeInsets
+                                                                .fromLTRB(
+                                                            0, 80, 0, 80),
+                                                    actions: [
+                                                      TextButton(
+                                                        child: const Text('확인'),
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                      ),
+                                                    ],
+                                                  );
+                                                });
+                                          }
+                                        } catch (e) {
+                                          showDialog(
+                                              context: context,
+                                              barrierDismissible:
+                                                  true, // 바깥 영역 터치시 닫을지 여부
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  content: const Text(
+                                                      "잠시 후 다시 시도해주세요"),
+                                                  insetPadding:
+                                                      const EdgeInsets.fromLTRB(
+                                                          0, 80, 0, 80),
+                                                  actions: [
+                                                    TextButton(
+                                                      child: const Text('확인'),
+                                                      onPressed: () {
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                      },
+                                                    ),
+                                                  ],
+                                                );
+                                              });
+                                        }
+                                      },
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceAround,

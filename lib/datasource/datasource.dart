@@ -12,7 +12,7 @@ class Datasource {
   Future<int> registerUser(int studentId, String studentName, String userId,
       String password, int phoneNumber, String email) async {
     final response = await http.post(
-      Uri.parse('http://everyparking.co.kr/app/member/join'),
+      Uri.parse(APIUrl.joinUrl),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'studentId': studentId.toInt(),
@@ -208,6 +208,38 @@ class Datasource {
       return true;
     } else {
       print("이미지 전송 실패");
+      return false;
+    }
+  }
+
+  //주차등록
+  Future<bool> parkingLotRent(String userId, int parkingId) async {
+    final response = await http.get(Uri.parse("${APIUrl.rentUrl}/$parkingId"),
+        headers: {'Content-Type': 'application/json', 'userId': userId});
+
+    if (response.statusCode == 200) {
+      print("주차성공");
+      print(json.decode(response.body));
+      return true;
+    } else {
+      print("주차실패");
+      print(json.decode(response.body));
+      return false;
+    }
+  }
+
+  //반납
+  Future<bool> parkingLotReturn(String userId, int parkingId) async {
+    final response = await http.get(Uri.parse("${APIUrl.returnUrl}/$parkingId"),
+        headers: {'Content-Type': 'application/json', 'userId': userId});
+
+    if (response.statusCode == 200) {
+      print("반납성공");
+      print(json.decode(response.body));
+      return true;
+    } else {
+      print("반납실패");
+      print(json.decode(response.body));
       return false;
     }
   }

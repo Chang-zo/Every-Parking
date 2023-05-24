@@ -114,6 +114,23 @@ class _LogInState extends State<LoginScreen> {
       }
     } catch (e) {
       print("로그인 catch문 실행");
+      showDialog(
+          context: context,
+          barrierDismissible: true, // 바깥 영역 터치시 닫을지 여부
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: const Text("회원가입을 진행해주세요"),
+              insetPadding: const EdgeInsets.fromLTRB(0, 80, 0, 80),
+              actions: [
+                TextButton(
+                  child: const Text('확인'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          });
     }
   }
 

@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       routes: {
         '/main': (context) => MainScreen(
-              userId: '이게 작동된다는건 로그인이 됐다는건데 왜 이름이 인식이 안되냐',
+              userId: '로컬정보로 로그인시도',
             ),
       },
       debugShowCheckedModeBanner: false,

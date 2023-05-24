@@ -1,6 +1,8 @@
 import 'package:every_parking/datasource/datasource.dart';
 import 'package:every_parking/screen/registration_screen.dart';
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 //회원가입 화면
 //로그 인 후에는 앱 켤떄 안보이게 하기
@@ -21,129 +23,6 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
 
   var isChecked = [false, false, false, false];
   var datasource = new Datasource();
-
-  Future<void> SignUpAction(int s_number, String u_name, String id, String pass, int phone_num,String email) async {
-    try{
-
-
-      int result = await datasource.registerUser( s_number, u_name, id, pass, phone_num, email);
-      print(result);
-      if (result == 200) {
-        showDialog(
-          context: context,
-          builder:
-              (BuildContext context) {
-            return AlertDialog(
-              content: const Text(
-                  "가입에 성공하였습니다."),
-              insetPadding:
-              const EdgeInsets
-                  .fromLTRB(
-                  0, 80, 0, 80),
-              actions: [
-                TextButton(
-                  child: const Text(
-                      '차량등록하러가기'),
-                  onPressed: () {
-                    Navigator
-                        .pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              RegisterCarScreen(
-                                  userId:
-                                  id)),
-                    );
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      } else if (result == 400) {
-        showDialog(
-          context: context,
-          builder:
-              (BuildContext context) {
-            return AlertDialog(
-              content: const Text(
-                  "이미 등록된 아이디입니다.\n다시 시도해주세요"),
-              insetPadding:
-              const EdgeInsets
-                  .fromLTRB(
-                  0, 80, 0, 80),
-              actions: [
-                TextButton(
-                  child:
-                  const Text('확인'),
-                  onPressed: () {
-                    Navigator.of(
-                        context)
-                        .pop();
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      } else {
-        /* 회원가입 실패 시 */
-        showDialog(
-          context: context,
-          builder:
-              (BuildContext context) {
-            return AlertDialog(
-              content: const Text(
-                  "잠시후 다시 시도해주세요"),
-              insetPadding:
-              const EdgeInsets
-                  .fromLTRB(
-                  0, 80, 0, 80),
-              actions: [
-                TextButton(
-                  child:
-                  const Text('확인'),
-                  onPressed: () {
-                    Navigator.of(
-                        context)
-                        .pop();
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      }
-    }catch(e){
-      print("회원가입 catch문 실행");
-      showDialog(
-        context: context,
-        builder:
-            (BuildContext context) {
-          return AlertDialog(
-            content: const Text(
-                "잠시후 다시 시도해주세요"),
-            insetPadding:
-            const EdgeInsets
-                .fromLTRB(
-                0, 80, 0, 80),
-            actions: [
-              TextButton(
-                child:
-                const Text('확인'),
-                onPressed: () {
-                  Navigator.of(
-                      context)
-                      .pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
-
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -207,7 +86,7 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                     //학번 입력되는 칸
                                     decoration:
                                         InputDecoration(labelText: '학번'),
-                                    keyboardType: TextInputType.number,
+                                    keyboardType: TextInputType.text,
                                   ),
                                   TextField(
                                     onChanged: (text) {
@@ -252,7 +131,7 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                     //전화번호 입력되는 칸
                                     decoration:
                                         InputDecoration(labelText: '전화번호'),
-                                    keyboardType: TextInputType.number,
+                                    keyboardType: TextInputType.text,
                                   ),
                                   TextField(
                                     onChanged: (text) {
@@ -338,7 +217,101 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                                 },
                                               );
                                             } else {
-                                              SignUpAction(s_number, u_name, id, pass, phone_num,email);
+                                              int result =
+                                                  await datasource.registerUser(
+                                                      s_number,
+                                                      u_name,
+                                                      id,
+                                                      pass,
+                                                      phone_num,
+                                                      email);
+                                              print(result);
+                                              if (result == 200) {
+                                                showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return AlertDialog(
+                                                      content: const Text(
+                                                          "가입에 성공하였습니다."),
+                                                      insetPadding:
+                                                          const EdgeInsets
+                                                                  .fromLTRB(
+                                                              0, 80, 0, 80),
+                                                      actions: [
+                                                        TextButton(
+                                                          child: const Text(
+                                                              '차량등록하러가기'),
+                                                          onPressed: () {
+                                                            Navigator
+                                                                .pushReplacement(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                  builder: (context) =>
+                                                                      RegisterCarScreen(
+                                                                          userId:
+                                                                              id)),
+                                                            );
+                                                          },
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
+                                                );
+                                              } else if (result == 400) {
+                                                showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return AlertDialog(
+                                                      content: const Text(
+                                                          "이미 등록된 아이디입니다.\n다시 시도해주세요"),
+                                                      insetPadding:
+                                                          const EdgeInsets
+                                                                  .fromLTRB(
+                                                              0, 80, 0, 80),
+                                                      actions: [
+                                                        TextButton(
+                                                          child:
+                                                              const Text('확인'),
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          },
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
+                                                );
+                                              } else {
+                                                /* 회원가입 실패 시 */
+                                                showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return AlertDialog(
+                                                      content: const Text(
+                                                          "잠시후 다시 시도해주세요"),
+                                                      insetPadding:
+                                                          const EdgeInsets
+                                                                  .fromLTRB(
+                                                              0, 80, 0, 80),
+                                                      actions: [
+                                                        TextButton(
+                                                          child:
+                                                              const Text('확인'),
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          },
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
+                                                );
+                                              }
                                             }
                                           },
                                         ),

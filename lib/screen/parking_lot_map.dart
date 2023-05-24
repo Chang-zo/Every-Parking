@@ -10,6 +10,7 @@ import '../Model/user.dart';
 import '../datasource/datasource.dart';
 import 'package:every_parking/screen/my_parking_status.dart';
 
+//주차장 칸 관련해서 수정하려면 ParkingMap클래스 말고 젤 아래에 있는 _ParkingCellState 건드리면 됨
 class ParkingMap extends StatefulWidget {
   final String name;
   final String userId;
@@ -25,7 +26,7 @@ class _ParkingMapState extends State<ParkingMap> {
   late List<ParkingArea> nowParkingList;
   var ds = new Datasource();
   String appbarName = "";
-  int parkNum = 0;
+  int parkId = 0;
 
   List<int> yellow = [2, 9, 16, 40, 54, 59, 73, 97, 104, 111];
   List<int> blink = [38, 39, 55, 56, 57, 58, 74, 75];
@@ -40,17 +41,17 @@ class _ParkingMapState extends State<ParkingMap> {
       used: 0,
       parkingInfoList: [],
     );
-    parkNum = 0;
+    parkId = 0;
     nowParkingList = [];
     _getParkingLotInfo();
   }
 
   void parkingNum(index) async {
     if (index == 0) {
-      parkNum = 0;
+      parkId = 0;
     } else {
-      parkNum++;
-      print(parkNum);
+      parkId++;
+      print(parkId);
     }
   }
 
@@ -103,18 +104,21 @@ class _ParkingMapState extends State<ParkingMap> {
                 child: SizedBox(
                   //height: MediaQuery.of(context).size.height * 0.5,
                   width: MediaQuery.of(context).size.width * 2.5,
+
+                  //정보 불러오는 동안 nowParkingList가 비어있기 때문에 오류 발생
+                  //비어있는 동안 CircularProgressIndicator 띄우면서 대기하다가
+                  //정보 다 불러와지면 주차장 맵 생성
                   child: nowParkingList.isEmpty
                       ? Container(
-                          width: double.infinity,
-                          height: double.infinity,
-                          child:
-                              const Center(child: CircularProgressIndicator()),
-                        ) // 데이터 로딩 중 표시
+                          child: const Center(
+                              child:
+                                  CircularProgressIndicator())) // 데이터 로딩 중 표시
                       : GridView.count(
                           shrinkWrap: true, // SingleChildScrollView에 맞게 크기 조정
                           crossAxisCount: 19,
                           childAspectRatio: (0.5 / 1),
-                          children: List.generate(nowParkingList.length + 58,
+                          children: List.generate(
+                              nowParkingList.length + 58, //주차 못하는 모든 칸의 수 58개
                               (index) {
                             if (index == 95) {
                               // 출구
@@ -151,13 +155,14 @@ class _ParkingMapState extends State<ParkingMap> {
                             } else if (blink.contains(index) ||
                                 19 <= index && index <= 37 ||
                                 76 <= index && index <= 94) {
-                              return SizedBox();
+                              return const SizedBox();
                             } else {
                               parkingNum(index);
                               return SizedBox(
                                 child: ParkingCell(
-                                  index: parkNum,
+                                  parkId: parkId,
                                   nowParkingList: nowParkingList,
+                                  userId: widget.userId,
                                 ),
                               );
                             }
@@ -172,39 +177,109 @@ class _ParkingMapState extends State<ParkingMap> {
 }
 
 class ParkingCell extends StatefulWidget {
-  final int index;
+  final int parkId;
   final List<ParkingArea> nowParkingList;
+  final String userId;
 
   const ParkingCell({
     Key? key,
-    required this.index,
+    required this.parkId,
     required this.nowParkingList,
+    required this.userId,
   }) : super(key: key);
 
   @override
-  State<ParkingCell> createState() => _ParkingCellState(index, nowParkingList);
+  State<ParkingCell> createState() =>
+      _ParkingCellState(parkId, nowParkingList, userId);
 }
 
 class _ParkingCellState extends State<ParkingCell> {
-  final int index;
+  final String userId;
+  final int parkId;
   final List<ParkingArea> nowParkingList;
 
-  _ParkingCellState(this.index, this.nowParkingList);
+  _ParkingCellState(this.parkId, this.nowParkingList, this.userId);
 
   bool isMe = false;
   int myParkingNum = 0;
 
-  void parkingStatusChange(parkingStatus, index) {
+  void parkingStatusChange(parkingStatus, parkId) {
     if (parkingStatus == "UNAVAILABLE") {
       setState(() {
-        nowParkingList[index].parkingStatus = "AVAILABLE";
+        nowParkingList[parkId].parkingStatus = "AVAILABLE";
         myParkingNum = 0;
       });
     } else if (parkingStatus == "AVAILABLE") {
       setState(() {
-        nowParkingList[index].parkingStatus = "UNAVAILABLE";
-        myParkingNum = index;
+        nowParkingList[parkId].parkingStatus = "UNAVAILABLE";
+        myParkingNum = parkId;
       });
+    }
+  }
+
+  Future<void> parkingLotRent() async {
+    try {
+      bool result = await Datasource().parkingLotRent(userId, parkId);
+      if (result) {
+        print("주차 성공!!!!");
+        showDialog(
+            context: context,
+            barrierDismissible: true, // 바깥 영역 터치시 닫을지 여부
+            builder: (BuildContext context) {
+              return AlertDialog(
+                content: const Text("주차 등록이 완료되었습니다."),
+                insetPadding: const EdgeInsets.fromLTRB(0, 80, 0, 80),
+                actions: [
+                  TextButton(
+                    child: const Text('확인'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            });
+        parkingStatusChange(nowParkingList[parkId].parkingStatus, parkId);
+      } else {
+        showDialog(
+            context: context,
+            barrierDismissible: true, // 바깥 영역 터치시 닫을지 여부
+            builder: (BuildContext context) {
+              return AlertDialog(
+                content: const Text("주차등록에 실패했습니다."),
+                insetPadding: const EdgeInsets.fromLTRB(0, 80, 0, 80),
+                actions: [
+                  TextButton(
+                    child: const Text('확인'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            });
+      }
+    } catch (e) {
+      showDialog(
+          context: context,
+          barrierDismissible: true, // 바깥 영역 터치시 닫을지 여부
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: const Text("서버와의 연결이 원활하지 않습니다.\n잠시 후 다시 시도해주세요"),
+              insetPadding: const EdgeInsets.fromLTRB(0, 80, 0, 80),
+              actions: [
+                TextButton(
+                  child: const Text('확인'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          });
     }
   }
 
@@ -212,20 +287,18 @@ class _ParkingCellState extends State<ParkingCell> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (nowParkingList[index].parkingStatus == "AVAILABLE") {
+        if (nowParkingList[parkId].parkingStatus == "AVAILABLE") {
           showDialog(
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                title: Text("$index번"),
+                title: Text("$parkId번"),
                 content: Text('해당 번호에 주차하시겠습니까?'),
                 actions: [
                   TextButton(
                     child: Text('확인'),
-                    onPressed: () {
-                      parkingStatusChange(
-                          nowParkingList[index].parkingStatus, index);
-                      Navigator.of(context).pop();
+                    onPressed: () async {
+                      parkingLotRent();
                     },
                   ),
                   TextButton(
@@ -241,19 +314,20 @@ class _ParkingCellState extends State<ParkingCell> {
         } else {
           showDialog(
             context: context,
-            builder: (context) => MyParkingInfo("$index번", myParkingNum),
+            builder: (context) =>
+                MyParkingInfo("$parkId번", myParkingNum, widget.userId),
           );
         }
       },
       child: Container(
         width: 100,
         height: 50,
-        color: nowParkingList[index].parkingStatus == "UNAVAILABLE"
+        color: nowParkingList[parkId].parkingStatus == "UNAVAILABLE"
             ? Colors.red
             : Colors.grey,
         child: Center(
           child: Text(
-            index.toString(),
+            parkId.toString(),
             style: TextStyle(
               color: Colors.white,
               fontSize: 15,
