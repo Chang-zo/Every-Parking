@@ -81,7 +81,8 @@ class _ReportScreenState extends State<ReportScreen> {
                     onPressed: () {
                       /* 서버 통신 */
                       print('제목 : ${title}, 내용 : ${contents}, 이미지 : ${imageList}' );
-                      ds.reportUser(title, contents, imageList, widget.userId);
+                      ds.reportImage(imageList, widget.userId);
+                      ds.reportTitleContents(title, contents,  widget.userId);
                     },
                     child: Text(
                       '신고하기',
