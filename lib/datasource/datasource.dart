@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:every_parking/Model/parkingstatus.dart';
 import 'package:every_parking/datasource/APIUrl.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import '../Model/parkingMapStatue.dart';
 import '../Model/user.dart';
@@ -191,15 +192,23 @@ class Datasource {
     }
   }
 
-  /* 신고 내용 서버 전송 */
-  Future<bool> reportImage(List<XFile> imageList, String userId) async {
+  /* 이미지 바이트 신고 내용 서버 전송 */
+  Future<bool> report(String title, String contents,List<XFile> imageList, String userId) async {
     print('$userId ');
     var request = http.MultipartRequest(
       'POST',
-      Uri.parse('http://everyparking.co.kr/images/upload'),
+      Uri.parse('http://everyparking.co.kr/report/upload'),
     );
     /* header에 유저 id 포함해서 전송 */
     request.headers['userId'] = userId.toString();
+
+
+
+    request.fields['title'] = title;
+    request.fields['contents'] = contents;
+// 마지막에 jsonEncode로 보내야한다.
+
+    // request.fields['data'] = jsonEncode(data);
 
     /* XFILE to MultipartFile  */
     for (var image in imageList) {
@@ -211,28 +220,10 @@ class Datasource {
     var response = await request.send();
 
     if (response.statusCode == 200) {
-      print("이미지 전송 성공");
+      print("신고 성공");
       return true;
     } else {
-      print("이미지 전송 실패");
-      return false;
-    }
-  }
-  /* 내용 제목만 전송 */
-  Future<bool> reportTitleContents(String title, String contents,
-      String userId) async {
-    final response = await http.post(
-      Uri.parse(APIUrl.carRegiUrl),
-      headers: {'Content-Type': 'application/json', 'userId': userId},
-      body: json.encode({'title': title, 'contents': contents}),
-    );
-
-    print(response.statusCode);
-    if (response.statusCode == 200) {
-      print('내용 전송 성공');
-      return true;
-    }  else {
-      print('내용 전송 실패');
+      print("신고 실패");
       return false;
     }
   }

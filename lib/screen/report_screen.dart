@@ -16,6 +16,8 @@ class ReportScreen extends StatefulWidget {
 
 class _ReportScreenState extends State<ReportScreen> {
 
+  TextEditingController _textEditingController = TextEditingController();
+  TextEditingController _textEditingController2 = TextEditingController();
   Datasource ds = new Datasource();
   var title = "";
   var contents = "";
@@ -37,6 +39,7 @@ class _ReportScreenState extends State<ReportScreen> {
                   focusedBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.grey)),
                 ),
+                controller: _textEditingController2,
                 onChanged: (text) {
                   setState(() {
                     this.title = text;
@@ -56,6 +59,7 @@ class _ReportScreenState extends State<ReportScreen> {
                       hintText: '내용',
                       focusedBorder: InputBorder.none,
                       enabledBorder: InputBorder.none),
+                  controller: _textEditingController,
                   onChanged: (text) {
                     setState(() {
                       this.contents = text;
@@ -78,11 +82,14 @@ class _ReportScreenState extends State<ReportScreen> {
                 child: Padding(
                   padding: const EdgeInsets.only(top: 30),
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       /* 서버 통신 */
                       print('제목 : ${title}, 내용 : ${contents}, 이미지 : ${imageList}' );
-                      ds.reportImage(imageList, widget.userId);
-                      ds.reportTitleContents(title, contents,  widget.userId);
+                      var checkReport = await ds.report(title, contents, imageList, widget.userId);
+
+                      if(checkReport){
+                        reloadPage();
+                      }
                     },
                     child: Text(
                       '신고하기',
@@ -102,6 +109,22 @@ class _ReportScreenState extends State<ReportScreen> {
         ),
         ]);
   }
+
+  void reloadPage(){
+    setState(() {
+      _textEditingController.text = '';
+      _textEditingController2.text = '';
+      this.imageList.clear();
+    });
+  }
+
+  @override
+  void dispose() {
+    _textEditingController.dispose();
+    _textEditingController2.dispose();
+    super.dispose();
+  }
+
 }
 
 
@@ -141,7 +164,7 @@ class _ImageUploaderState extends State<ImageUploader> {
   List<XFile> _pickedImgs = [];
 
   Future<void> _pickImg() async {
-    final List<XFile>? images = await _picker.pickMultiImage(imageQuality: 85);
+    final List<XFile>? images = await _picker.pickMultiImage(imageQuality: 10);
     if (images != null) {
       setState(() {
         _pickedImgs = images;
