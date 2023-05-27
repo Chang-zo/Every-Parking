@@ -1,9 +1,15 @@
+import 'dart:convert';
+
 import 'package:every_parking/screen/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../Model/user.dart';
+import '../datasource/datasource.dart';
+
 class MyPageScreen extends StatefulWidget {
-  const MyPageScreen({Key? key}) : super(key: key);
+  final String userId;
+  const MyPageScreen({Key? key, required this.userId}) : super(key: key);
 
   @override
   State<MyPageScreen> createState() => _MyPageScreenState();
@@ -12,6 +18,57 @@ class MyPageScreen extends StatefulWidget {
 class _MyPageScreenState extends State<MyPageScreen> {
   static final storage = FlutterSecureStorage();
   dynamic userInfo = '';
+
+  var ds = Datasource();
+  var user = User(studentName: '', status: false);
+  String carNum = "";
+  String carName = "";
+
+  @override
+  void initState() {
+    super.initState();
+    // 비동기로 flutter secure storage 정보를 불러오는 작업
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      checkUserState();
+    });
+    _getUserInfo();
+    carInfo();
+  }
+
+  Future<void> _getUserInfo() async {
+    try {
+      print("유저 가져오기 시도");
+      User userInfo = await ds.userInfo(widget.userId);
+      print("유저정보 가져오기 try문");
+      print(widget.userId);
+      print(userInfo.studentName);
+      setState(() {
+        user.studentName = userInfo.studentName;
+        user.status = userInfo.status;
+      });
+    } catch (e) {
+      setState(() {
+        user.studentName = widget.userId;
+        user.status = true;
+      });
+
+      print("유저정보 가져오기 catch문");
+      print(widget.userId);
+    }
+  }
+
+  Future<void> carInfo() async {
+    try {
+      dynamic carInfo = await storage.read(key: 'carNumber');
+      var parsedJson = json.decode(carInfo);
+      carNum = parsedJson['carNum'];
+      carName = parsedJson['carName'];
+      print("마이페이지 차량정보 가져오기");
+      print(carNum + carName);
+    } catch (e) {
+      print("마이페이지 차량정보 가져오기 실패");
+    }
+  }
 
   logout() async {
     await storage.deleteAll();
@@ -28,16 +85,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
     } else {
       //print('로그인 중');
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    // 비동기로 flutter secure storage 정보를 불러오는 작업
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      checkUserState();
-    });
   }
 
   @override
@@ -76,14 +123,14 @@ class _MyPageScreenState extends State<MyPageScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Text(
-                          'Name',
+                          user.studentName,
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
-                          '차량 번호 - 코나',
+                          '$carNum - $carName',
                           style: TextStyle(
                               fontSize: 18,
                               color: Colors.grey.withOpacity(0.8)),

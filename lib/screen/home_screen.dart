@@ -22,8 +22,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreen extends State<HomeScreen> {
   var test;
-  var ds = new Datasource();
-  var user = new User();
+  var ds = Datasource();
+  var user = User(studentName: '', status: false);
   var myParkingStatus = MyParkingStatus(parkingId: 0, remain: 0, carNumber: "");
   late List<ParkingLotInfo> nowParkingList;
   static final storage = FlutterSecureStorage();
@@ -39,7 +39,6 @@ class _HomeScreen extends State<HomeScreen> {
     initializeData();
     nowParkingList = [
       ParkingLotInfo(name: "동문주차장", used: 65, total: 106),
-      ParkingLotInfo(name: "남문주차장", used: 13, total: 19),
     ];
   }
 
@@ -147,6 +146,11 @@ class _HomeScreen extends State<HomeScreen> {
                 .difference(savedTime)
                 .inMinutes; // 180분 - (주차 시작시간 - 현재시간)
         i = myParkingStatus.remain;
+
+        //시간 정보를 불러왔는데, 음수일 경우 반납처리하기
+        /*if (i < 0) {
+          parkingReturn(widget.userId, myParkingStatus.parkingId);
+        }*/
       });
     } catch (e) {
       print("내 자동차 정보 가져오기 catch 문");
@@ -166,13 +170,14 @@ class _HomeScreen extends State<HomeScreen> {
   /*주차장 상태 가져오기*/
   Future<void> _getParkingLotInfo() async {
     ParkingLotInfo nowParkingStatusInfo = await ds.nowParking(widget.userId);
+    List<ParkingLotInfo> newParkingList = [];
+    newParkingList.add(nowParkingStatusInfo);
 
     print(
         'home/ ${nowParkingStatusInfo.total},${nowParkingStatusInfo.used},${nowParkingStatusInfo.name}');
 
     setState(() {
-      nowParkingList.removeAt(1);
-      nowParkingList.add(nowParkingStatusInfo);
+      nowParkingList.addAll(newParkingList);
     });
   }
 
@@ -370,60 +375,73 @@ class _HomeScreen extends State<HomeScreen> {
                           child: Container(
                             padding: EdgeInsets.only(
                                 top: MediaQuery.of(context).size.height * 0.22),
-                            child: ListView.builder(
-                              itemCount: nowParkingList.length,
-                              itemBuilder: (context, index) {
-                                return GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => ParkingMap(
-                                              nowParkingList[index].name,
-                                              widget.userId)),
-                                    );
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 5.0),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: <Widget>[
-                                        Text(nowParkingList[index].name),
-                                        Container(
-                                          margin:
-                                              EdgeInsets.symmetric(vertical: 5),
-                                          width: 300,
-                                          height: 20,
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(10)),
-                                            child: LinearProgressIndicator(
-                                              value: (nowParkingList[index]
-                                                      .used /
-                                                  nowParkingList[index].total),
-                                              valueColor:
-                                                  AlwaysStoppedAnimation<Color>(
-                                                      Color(0xff00ff00)),
-                                              backgroundColor:
-                                                  Color(0xffD6D6D6),
-                                            ),
+                            child: nowParkingList.length == 1 ||
+                                    nowParkingList.isEmpty
+                                ? Container(
+                                    child: const Center(
+                                        child:
+                                            CircularProgressIndicator())) // 데이터 로딩 중 표시
+                                : ListView.builder(
+                                    itemCount: nowParkingList.length,
+                                    itemBuilder: (context, index) {
+                                      return GestureDetector(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ParkingMap(
+                                                        nowParkingList[index]
+                                                            .name,
+                                                        widget.userId)),
+                                          );
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 5.0),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: <Widget>[
+                                              Text(nowParkingList[index].name),
+                                              Container(
+                                                margin: EdgeInsets.symmetric(
+                                                    vertical: 5),
+                                                width: 300,
+                                                height: 20,
+                                                child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(10)),
+                                                  child:
+                                                      LinearProgressIndicator(
+                                                    value: (nowParkingList[
+                                                                index]
+                                                            .used /
+                                                        nowParkingList[index]
+                                                            .total),
+                                                    valueColor:
+                                                        AlwaysStoppedAnimation<
+                                                                Color>(
+                                                            Color(0xff00ff00)),
+                                                    backgroundColor:
+                                                        Color(0xffD6D6D6),
+                                                  ),
+                                                ),
+                                              ),
+                                              Text((nowParkingList[index].used)
+                                                      .toString() +
+                                                  "/" +
+                                                  nowParkingList[index]
+                                                      .total
+                                                      .toString()),
+                                              Divider(),
+                                            ],
                                           ),
                                         ),
-                                        Text((nowParkingList[index].used)
-                                                .toString() +
-                                            "/" +
-                                            nowParkingList[index]
-                                                .total
-                                                .toString()),
-                                        Divider(),
-                                      ],
-                                    ),
+                                      );
+                                    },
                                   ),
-                                );
-                              },
-                            ),
                           )),
                       // 상단 고정 컨테이너
                       Positioned(

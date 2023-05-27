@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:every_parking/datasource/datasource.dart';
 import 'package:every_parking/screen/main_screen.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -24,6 +25,17 @@ class _RegisterCarScreen extends State<RegisterCarScreen> {
   var modelName; /* 차량 모델 */
 
   var ds = new Datasource();
+
+  static final storage = FlutterSecureStorage();
+
+  Future<void> saveCarInfo(carNum, carName) async {
+    var val = json.encode({'carNum': carNum, 'carName': carName});
+
+    await storage.write(
+      key: 'carNumber',
+      value: val,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -152,6 +164,8 @@ class _RegisterCarScreen extends State<RegisterCarScreen> {
                                                 context: context,
                                                 builder:
                                                     (BuildContext context) {
+                                                  saveCarInfo(
+                                                      carNumber, modelName);
                                                   return AlertDialog(
                                                     content: const Text(
                                                         "차량등록에 성공하였습니다."),
