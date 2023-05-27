@@ -13,7 +13,8 @@ class APIUrl {
 
   static String get userParkingInfoUrl =>
       '$_baseUrl/parking/myParkingStatus'; //내차량정보(주차중인 칸, 남은시간, 차번호)
-
+  static String get reportImageUrl => 'http://everyparking.co.kr/images/upload'; // 이미지 전송
+  static String get reportContentsUrl => 'http://everyparking.co.kr/report/upload'; // 제목, 내용 전송
   static String get parkingListUrl => '$_baseUrl/parking/parkingList';
 
   static String get alertUrl => '$_baseUrl/alert/alert';

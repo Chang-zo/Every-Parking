@@ -192,8 +192,7 @@ class Datasource {
   }
 
   /* 신고 내용 서버 전송 */
-  Future<bool> reportUser(String title, String contents, List<XFile> imageList,
-      String userId) async {
+  Future<bool> reportImage(List<XFile> imageList, String userId) async {
     print('$userId ');
     var request = http.MultipartRequest(
       'POST',
@@ -216,6 +215,24 @@ class Datasource {
       return true;
     } else {
       print("이미지 전송 실패");
+      return false;
+    }
+  }
+  /* 내용 제목만 전송 */
+  Future<bool> reportTitleContents(String title, String contents,
+      String userId) async {
+    final response = await http.post(
+      Uri.parse(APIUrl.carRegiUrl),
+      headers: {'Content-Type': 'application/json', 'userId': userId},
+      body: json.encode({'title': title, 'contents': contents}),
+    );
+
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      print('내용 전송 성공');
+      return true;
+    }  else {
+      print('내용 전송 실패');
       return false;
     }
   }
