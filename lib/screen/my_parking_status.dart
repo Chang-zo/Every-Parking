@@ -53,6 +53,57 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
     }
   }
 
+  Future<void> parkingReturn(userId, parkingId) async {
+    try {
+      int result = await Datasource().parkingLotReturn(userId, parkingId);
+      print("parkingReturn");
+      print(result);
+      if (result == 200) {
+        print("반납 성공!!!!");
+        await storage.delete(key: "myParkingLot");
+        print("로컬 주차정보 제거 완료");
+        showDialog(
+            context: context,
+            barrierDismissible: true, // 바깥 영역 터치시 닫을지 여부
+            builder: (BuildContext context) {
+              return AlertDialog(
+                content: const Text("주차 반납이 완료되었습니다."),
+                insetPadding: const EdgeInsets.fromLTRB(0, 80, 0, 80),
+                actions: [
+                  TextButton(
+                    child: const Text('확인'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            });
+      }
+    } catch (e) {
+      showDialog(
+          context: context,
+          barrierDismissible: true, // 바깥 영역 터치시 닫을지 여부
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: const Text("잠시 후 다시 시도해주세요"),
+              insetPadding: const EdgeInsets.fromLTRB(0, 80, 0, 80),
+              actions: [
+                TextButton(
+                  child: const Text('확인'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -153,91 +204,8 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
                                         ),
                                       ),
                                       onPressed: () async {
-                                        try {
-                                          if (await Datasource()
-                                              .parkingLotReturn(
-                                                  widget.userId, myParkingId)) {
-                                            print("반납 성공!!!!");
-                                            showDialog(
-                                                context: context,
-                                                barrierDismissible:
-                                                    true, // 바깥 영역 터치시 닫을지 여부
-                                                builder:
-                                                    (BuildContext context) {
-                                                  return AlertDialog(
-                                                    content: const Text(
-                                                        "주차 반납이 완료되었습니다."),
-                                                    insetPadding:
-                                                        const EdgeInsets
-                                                                .fromLTRB(
-                                                            0, 80, 0, 80),
-                                                    actions: [
-                                                      TextButton(
-                                                        child: const Text('확인'),
-                                                        onPressed: () {
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        },
-                                                      ),
-                                                    ],
-                                                  );
-                                                });
-                                          } else {
-                                            showDialog(
-                                                context: context,
-                                                barrierDismissible:
-                                                    true, // 바깥 영역 터치시 닫을지 여부
-                                                builder:
-                                                    (BuildContext context) {
-                                                  return AlertDialog(
-                                                    content: const Text(
-                                                        "주차반납에 실패했습니다."),
-                                                    insetPadding:
-                                                        const EdgeInsets
-                                                                .fromLTRB(
-                                                            0, 80, 0, 80),
-                                                    actions: [
-                                                      TextButton(
-                                                        child: const Text('확인'),
-                                                        onPressed: () {
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        },
-                                                      ),
-                                                    ],
-                                                  );
-                                                });
-                                          }
-                                        } catch (e) {
-                                          showDialog(
-                                              context: context,
-                                              barrierDismissible:
-                                                  true, // 바깥 영역 터치시 닫을지 여부
-                                              builder: (BuildContext context) {
-                                                return AlertDialog(
-                                                  content: const Text(
-                                                      "잠시 후 다시 시도해주세요"),
-                                                  insetPadding:
-                                                      const EdgeInsets.fromLTRB(
-                                                          0, 80, 0, 80),
-                                                  actions: [
-                                                    TextButton(
-                                                      child: const Text('확인'),
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      },
-                                                    ),
-                                                  ],
-                                                );
-                                              });
-                                        }
+                                        parkingReturn(
+                                            widget.userId, myParkingId);
                                       },
                                       child: Row(
                                         mainAxisAlignment:
@@ -267,7 +235,11 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
                                               BorderRadius.circular(15.0),
                                         ),
                                       ),
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        print("시간 연장 버튼 클릭");
+                                        var parsedJson = json.decode(
+                                            "myParkingLot"); // 로컬에 저장된 주차 정보 가져오기
+                                      },
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceAround,

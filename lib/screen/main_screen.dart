@@ -30,11 +30,11 @@ class _MainScreenState extends State<MainScreen> {
           'assets/icons/blue/custom.bubble.left.and.exclamationmark.bubble.right.svg',
       label: '신고',
     ),
-    BottomIndicatorNavigationBarItem(
+    /*BottomIndicatorNavigationBarItem(
       icon: 'assets/icons/black/custom.bell.svg',
       activeIcon: 'assets/icons/blue/custom.bell.svg',
       label: '알림',
-    ),
+    ),*/
     BottomIndicatorNavigationBarItem(
       icon: 'assets/icons/black/custom.person.crop.circle.svg',
       activeIcon: 'assets/icons/blue/custom.person.crop.circle.svg',
@@ -54,7 +54,7 @@ class _MainScreenState extends State<MainScreen> {
           ReportScreen(
             userId: widget.userId,
           ),
-          NoticeScreen(),
+          //NoticeScreen(),
           MyPageScreen()
         ],
       ),

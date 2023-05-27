@@ -52,6 +52,7 @@ class Datasource {
       return 400;
     } else {
       print("Datasource 로그인 실패");
+      print(response.statusCode);
       return 0;
     }
   }
@@ -80,15 +81,19 @@ class Datasource {
 
   /* 내 주차 정보 확인 */
   Future<MyParkingStatus> myParkingStatus(String userId) async {
+    print("데이터소스 내 주차 정보 확인 함수 실행");
+    print(userId);
     final response = await http.get(
       Uri.parse(APIUrl.userParkingInfoUrl),
       headers: {'Content-Type': 'application/json', 'userId': userId},
     );
-
+    print("데이터소스 내 주차 정보 확인 함수 완료");
+    print(response.statusCode);
     if (response.statusCode == 200) {
-      print("내 주차 정보 받아오기 성공" + json.decode(response.body));
+      print("내 주차 정보 받아오기 성공");
       return MyParkingStatus.fromJson(json.decode(response.body));
     } else {
+      print("내 주차 정보 받아오기 실패");
       throw Exception('내 주차 정보 받기 실패');
     }
   }
@@ -99,13 +104,15 @@ class Datasource {
   *  초라해보이면 기존 방식처럼 동문 남문 주차장 앱에서 임의로 만들어 채울 것임
   * */
   Future<ParkingLotInfo> nowParking(String userId) async {
+    print("홈화면에 주차장 정보 불러오는 함수 실행");
     final response = await http.get(Uri.parse(APIUrl.parkingInfoUrl),
         headers: {'Content-Type': 'application/json', 'userId': userId});
 
+    print("홈화면에 주차장 정보 불러오는 함수 완료");
+    print(response.statusCode);
     if (response.statusCode == 200) {
       print(json.decode(response.body));
       print("주차장 현황 받아오기 성공");
-
       return ParkingLotInfo.fromJson(
           json.decode(utf8.decode(response.bodyBytes)));
     } else {
@@ -193,7 +200,7 @@ class Datasource {
       Uri.parse('http://everyparking.co.kr/images/upload'),
     );
     /* header에 유저 id 포함해서 전송 */
-    request.headers['userId'] = userId;
+    request.headers['userId'] = userId.toString();
 
     /* XFILE to MultipartFile  */
     for (var image in imageList) {
@@ -218,30 +225,29 @@ class Datasource {
     final response = await http.get(Uri.parse("${APIUrl.rentUrl}/$parkingId"),
         headers: {'Content-Type': 'application/json', 'userId': userId});
 
+    print(response.statusCode);
+
     if (response.statusCode == 200) {
       print("주차성공");
-      print(json.decode(response.body));
       return true;
     } else {
       print("주차실패");
-      print(json.decode(response.body));
       return false;
     }
   }
 
   //반납
-  Future<bool> parkingLotReturn(String userId, int parkingId) async {
+  Future<int> parkingLotReturn(String userId, int parkingId) async {
+    print("parkingLotReturn 호출");
     final response = await http.get(Uri.parse("${APIUrl.returnUrl}/$parkingId"),
         headers: {'Content-Type': 'application/json', 'userId': userId});
-
+    print("parkingLotReturn 성공");
     if (response.statusCode == 200) {
       print("반납성공");
-      print(json.decode(response.body));
-      return true;
+      return 200;
     } else {
       print("반납실패");
-      print(json.decode(response.body));
-      return false;
+      return 0;
     }
   }
 }

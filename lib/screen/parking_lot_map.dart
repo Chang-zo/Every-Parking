@@ -51,10 +51,8 @@ class _ParkingMapState extends State<ParkingMap> {
   void parkingNum(index) async {
     if (index == 0) {
       parkId = 1;
-      print("index가 0이라는데?");
     } else {
       parkId++;
-      print(parkId);
     }
   }
 
@@ -209,16 +207,36 @@ class _ParkingCellState extends State<ParkingCell> {
   final String parkingLotName;
   static final storage = FlutterSecureStorage();
 
+  int k = 12;
+  String parkingName = '0';
+
   _ParkingCellState(
       this.parkId, this.nowParkingList, this.userId, this.parkingLotName);
 
   void parkingStatusChange(parkingStatus, parkId) {
+    print("parkingStatusChange 실행");
     if (parkingStatus == "AVAILABLE") {
       setState(() {
         nowParkingList[parkId].parkingStatus = "USED";
-        print("parkingStatusChange 내부");
       });
     }
+  }
+
+  String setParkingName(int parkId) {
+    if (parkId <= 29) {
+      setState(() {
+        parkingName = 'B$parkId';
+      });
+    } else if (parkId <= 42) {
+      setState(() {
+        parkingName = 'A${parkId - 15}';
+      });
+    } else {
+      setState(() {
+        parkingName = 'A${parkId - 42}';
+      });
+    }
+    return parkingName;
   }
 
   Future<void> parkingLotRent(id, parkingLotId) async {
@@ -246,12 +264,17 @@ class _ParkingCellState extends State<ParkingCell> {
             });
         parkingStatusChange(nowParkingList[parkId].parkingStatus, parkId);
 
-        var val = json.encode({'parkId': parkId});
+        print("로컬에 저장할 정보 만들기");
+        var val = json.encode(
+            {'parkId': parkId, 'startTime': DateTime.now().toIso8601String()});
+        print(val);
 
+        print("주차 정보 로컬에 저장하기");
         await storage.write(
           key: 'myParkingLot',
           value: val,
         );
+        print("주차 정보 로컬에 저장완료");
       } else {
         showDialog(
             context: context,
@@ -303,7 +326,7 @@ class _ParkingCellState extends State<ParkingCell> {
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                title: Text("$parkId번"),
+                title: Text("$parkingName번"),
                 content: Text('해당 번호에 주차하시겠습니까?'),
                 actions: [
                   TextButton(
@@ -323,11 +346,10 @@ class _ParkingCellState extends State<ParkingCell> {
             },
           );
         } else {
-          print("myParkingNum");
           showDialog(
               context: context,
               builder: (context) =>
-                  MyParkingInfo("$parkId번", widget.userId, parkId));
+                  MyParkingInfo("$parkingName번", widget.userId, parkId));
         }
       },
       child: Container(
@@ -337,14 +359,13 @@ class _ParkingCellState extends State<ParkingCell> {
             ? Colors.red
             : Colors.grey,
         child: Center(
-          child: Text(
-            parkId.toString(),
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 15,
-            ),
+            child: Text(
+          setParkingName(parkId),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 15,
           ),
-        ),
+        )),
       ),
     );
   }

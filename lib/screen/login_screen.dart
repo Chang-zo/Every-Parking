@@ -40,6 +40,7 @@ class _LogInState extends State<LoginScreen> {
     // read 함수로 key값에 맞는 정보를 불러오고 데이터타입은 String 타입
     // 데이터가 없을때는 null을 반환
     userInfo = await storage.read(key: 'login');
+    print(userInfo);
 
     // user의 정보가 있다면 로그인 후 들어가는 첫 페이지로 넘어가게 합니다.
     if (userInfo != null) {
@@ -49,12 +50,10 @@ class _LogInState extends State<LoginScreen> {
         userId = parsedJson['userId'];
         userpass = parsedJson['password'];
 
-        final response = await http.post(
-          Uri.parse(APIUrl.loginUrl),
-          headers: {'Content-Type': 'application/json'},
-          body: json.encode({'userId': userId, 'password': userpass}),
-        );
-        if (response.statusCode == 200) {
+        int result = await Datasource().loginUser(userId, userpass);
+        print(result);
+
+        if (result == 200) {
           print("로컬데이터 로그인성공");
           id = userId;
           print(userInfo);
