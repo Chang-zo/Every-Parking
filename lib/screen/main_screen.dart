@@ -10,7 +10,9 @@ import 'package:bottom_indicator_bar_svg/bottom_indicator_bar_svg.dart';
 
 class MainScreen extends StatefulWidget {
   final String userId;
-  const MainScreen({Key? key, required this.userId}) : super(key: key);
+  final int index;
+  const MainScreen({Key? key, required this.userId, required this.index})
+      : super(key: key);
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -42,6 +44,13 @@ class _MainScreenState extends State<MainScreen> {
       label: '마이페이지',
     ),
   ];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _selectedIndex = widget.index;
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -267,12 +267,14 @@ class _HomeScreen extends State<HomeScreen> {
     });
   }
 
-  Text _reMain() {
-    return Text("${time_h.toString()}시간\n${time_m.toString()}분");
+  void timeExtension() {
+    setState(() {
+      i = 180;
+    });
   }
 
-  Future<void> _refresh() async {
-    _getParkingLotInfo();
+  Text _reMain() {
+    return Text("${time_h.toString()}시간\n${time_m.toString()}분");
   }
 
   Future<void> _refreshAll() async {
@@ -574,9 +576,7 @@ class _HomeScreen extends State<HomeScreen> {
                                             indent: 10,
                                             endIndent: 10,
                                           ),
-                                          user.status == true
-                                              ? _reMain()
-                                              : Text("00시간\n00분")
+                                          _reMain()
                                         ],
                                       ),
                                     ),
@@ -602,15 +602,7 @@ class _HomeScreen extends State<HomeScreen> {
                                                   ),
                                                 ),
                                                 onPressed: () {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (context) =>
-                                                        MyParkingInfo(
-                                                            "번",
-                                                            widget.userId,
-                                                            myParkingStatus
-                                                                .parkingId),
-                                                  );
+                                                  timeExtension();
                                                 },
                                                 child: Row(
                                                   mainAxisAlignment:
@@ -641,15 +633,10 @@ class _HomeScreen extends State<HomeScreen> {
                                                   ),
                                                 ),
                                                 onPressed: () {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (context) =>
-                                                        MyParkingInfo(
-                                                            "번",
-                                                            widget.userId,
-                                                            myParkingStatus
-                                                                .parkingId),
-                                                  );
+                                                  parkingReturn(
+                                                      widget.userId,
+                                                      myParkingStatus
+                                                          .parkingId);
                                                 },
                                                 child: Row(
                                                   mainAxisAlignment:

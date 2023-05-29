@@ -5,8 +5,7 @@ packages:
     dependency: "direct main"
     description:
       name: adaptive_action_sheet
-      sha256: "2cf53889102f2f476d03da30ef4219a3199f1d9b9f7bf063e2b23cd5aa88ea02"
-      url: "https://pub.dev"
+      url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.2"
   archive:

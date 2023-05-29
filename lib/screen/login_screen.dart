@@ -61,7 +61,10 @@ class _LogInState extends State<LoginScreen> {
           Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                  builder: (context) => MainScreen(userId: userId)));
+                  builder: (context) => MainScreen(
+                        userId: userId,
+                        index: 0,
+                      )));
         } else {
           print("로컬데이터 로그인실패");
         }
@@ -87,8 +90,13 @@ class _LogInState extends State<LoginScreen> {
 
         print("로그인 성공!!!!!!!");
         print(id);
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => MainScreen(userId: id)));
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => MainScreen(
+                      userId: id,
+                      index: 0,
+                    )));
         print(id);
       } else if (login_result == 400) {
         print("아이디 혹은 비번 오류");

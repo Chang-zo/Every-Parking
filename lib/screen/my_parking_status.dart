@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:every_parking/datasource/datasource.dart';
+import 'package:every_parking/screen/main_screen.dart';
+import 'package:every_parking/screen/report_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -21,11 +24,16 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
   dynamic parkingInfo = '';
   int myParkingId = 0;
   bool isMe = false;
+
+  int time_h = 0;
+  int time_m = 0;
+
   @override
   void initState() {
     print("MyParkingInfo의 initState 실행");
     super.initState();
     myParkingInfo();
+    getRemainTime();
   }
 
   Future<void> myParkingInfo() async {
@@ -124,6 +132,25 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
     }
   }
 
+  //서버로부터 시간 정보 받아와지면 수정할것
+  int i = 10;
+  void getRemainTime() {
+    //savedTime 위치에 주차 등록 시간 입력하면 끝!
+    DateTime savedTime = DateTime(2023, 5, 30, 0, 0, 0, 0);
+    int remain = 179 -
+        DateTime.now()
+            .difference(savedTime)
+            .inMinutes; // 180분 - (주차 시작시간 - 현재시간)
+    i = remain;
+
+    time_h = i ~/ 60;
+    time_m = i % 60;
+  }
+
+  Text _reMain() {
+    return Text("${time_h.toString()}시간\n${time_m.toString()}분");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -197,11 +224,7 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
                                   indent: 10,
                                   endIndent: 10,
                                 ),
-                                Text(
-                                  "00시 00분",
-                                  style: TextStyle(
-                                      fontSize: 20, color: Colors.black),
-                                )
+                                _reMain()
                               ],
                             ),
                           ),
@@ -243,36 +266,6 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
                                         ],
                                       )),
                                 ),
-                                SizedBox(
-                                  width: 150,
-                                  height: 40,
-                                  child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Color.fromARGB(
-                                            0xFF, 0x2F, 0x64, 0x96),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(15.0),
-                                        ),
-                                      ),
-                                      onPressed: () {
-                                        print("시간 연장 버튼 클릭");
-                                        var parsedJson = json.decode(
-                                            "myParkingLot"); // 로컬에 저장된 주차 정보 가져오기
-                                      },
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceAround,
-                                        children: [
-                                          SvgPicture.asset(
-                                            'assets/icons/white/custom.plus.app.svg',
-                                            width: 20,
-                                            height: 20,
-                                          ),
-                                          Text("시간연장")
-                                        ],
-                                      )),
-                                ),
                               ],
                             )
                           : ButtonBar(
@@ -290,7 +283,15 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
                                               BorderRadius.circular(15.0),
                                         ),
                                       ),
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => MainScreen(
+                                                  userId: widget.userId,
+                                                  index: 1)),
+                                        );
+                                      },
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceAround,

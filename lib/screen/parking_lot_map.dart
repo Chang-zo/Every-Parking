@@ -11,6 +11,8 @@ import '../datasource/datasource.dart';
 import 'package:every_parking/screen/my_parking_status.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'main_screen.dart';
+
 //주차장 칸 관련해서 수정하려면 ParkingMap클래스 말고 젤 아래에 있는 _ParkingCellState 건드리면 됨
 class ParkingMap extends StatefulWidget {
   final String name;
@@ -256,8 +258,14 @@ class _ParkingCellState extends State<ParkingCell> {
                   TextButton(
                     child: const Text('확인'),
                     onPressed: () {
-                      Navigator.of(context).pop();
-                      Navigator.of(context).pop();
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => MainScreen(
+                                  userId: widget.userId,
+                                  index: 0,
+                                )),
+                      );
                     },
                   ),
                 ],

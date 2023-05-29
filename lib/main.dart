@@ -20,6 +20,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/main': (context) => MainScreen(
               userId: '로컬정보로 로그인시도',
+              index: 0,
             ),
       },
       debugShowCheckedModeBanner: false,
