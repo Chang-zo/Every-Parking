@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../datasource/datasource.dart';
-import 'package:provider/provider.dart';
+import 'package:adaptive_action_sheet/adaptive_action_sheet.dart';
 
 class ReportScreen extends StatefulWidget {
   final String userId;
@@ -165,9 +165,21 @@ class _ImageUploaderState extends State<ImageUploader> {
 
   Future<void> _pickImg() async {
     final List<XFile>? images = await _picker.pickMultiImage(imageQuality: 10);
+
     if (images != null) {
       setState(() {
         _pickedImgs = images;
+      });
+      widget.onChanged?.call(_pickedImgs);
+    }
+  }
+
+  Future<void> _cameraImg() async {
+    final XFile? images = await _picker.pickImage(source: ImageSource.camera);
+
+    if (images != null) {
+      setState(() {
+        _pickedImgs.add(images);
       });
       widget.onChanged?.call(_pickedImgs);
     }
@@ -180,7 +192,27 @@ class _ImageUploaderState extends State<ImageUploader> {
     List<Widget> _boxContents = [
       IconButton(
           onPressed: () {
-            _pickImg();
+            showAdaptiveActionSheet(
+              context: context,
+              actions: <BottomSheetAction>[
+                BottomSheetAction(
+                  title: const Text('갤러리에서 가져오기'),
+                  onPressed: (_) {
+                    _pickImg();
+                    Navigator.pop(context);
+                    },
+                ),
+                BottomSheetAction(
+                  title: const Text('사진 촬영'),
+                  onPressed: (_) {
+                    _cameraImg();
+                    Navigator.pop(context);
+                    },
+                ),
+              ],
+              cancelAction: CancelAction(title: const Text('Cancel')),
+            );
+            // _pickImg();
           },
           icon: Container(
               alignment: Alignment.center,

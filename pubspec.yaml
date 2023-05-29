@@ -35,6 +35,7 @@ dependencies:
 
   # 이미지 첨부하기 위해 image picker 사용
   image_picker: ^0.8.7+1
+  adaptive_action_sheet: ^2.0.2
 
   # 이미지 첨부할 때 container에 dotted 추가 하기 위해
   dotted_border: ^2.0.0+3
