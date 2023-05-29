@@ -9,108 +9,106 @@ import 'package:adaptive_action_sheet/adaptive_action_sheet.dart';
 
 class ReportScreen extends StatefulWidget {
   final String userId;
-  const ReportScreen({Key? key,required this.userId}) : super(key: key);
+  const ReportScreen({Key? key, required this.userId}) : super(key: key);
   @override
   State<ReportScreen> createState() => _ReportScreenState();
 }
 
 class _ReportScreenState extends State<ReportScreen> {
-
   TextEditingController _textEditingController = TextEditingController();
   TextEditingController _textEditingController2 = TextEditingController();
   Datasource ds = new Datasource();
   var title = "";
   var contents = "";
+
   List<XFile> imageList = [];
   @override
   Widget build(BuildContext context) {
-    return ListView(
-        children: [ Padding(
-          padding: const EdgeInsets.fromLTRB(24, 10, 24, 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
+    return ListView(children: [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(24, 10, 24, 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              decoration: InputDecoration(
+                hintText: '제목',
+                enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey)),
+                contentPadding: EdgeInsets.only(left: 11),
+                focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey)),
+              ),
+              controller: _textEditingController2,
+              onChanged: (text) {
+                setState(() {
+                  this.title = text;
+                });
+              },
+            ),
+            Container(
+              padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
+              height: 10 * 24.0,
+              color: Color.fromRGBO(250, 250, 250, 1),
+              child: TextField(
+                maxLines: 10,
+                keyboardType: TextInputType.multiline,
                 decoration: InputDecoration(
-                  hintText: '제목',
-                  enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey)),
-                  contentPadding: EdgeInsets.only(left: 11),
-                  focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey)),
-                ),
-                controller: _textEditingController2,
+                    filled: true,
+                    fillColor: Color.fromRGBO(250, 250, 250, 1),
+                    hintText: '내용',
+                    focusedBorder: InputBorder.none,
+                    enabledBorder: InputBorder.none),
+                controller: _textEditingController,
                 onChanged: (text) {
                   setState(() {
-                    this.title = text;
+                    this.contents = text;
                   });
                 },
               ),
-              Container(
-                padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
-                height: 10 * 24.0,
-                color: Color.fromRGBO(250, 250, 250, 1),
-                child: TextField(
-                  maxLines: 10,
-                  keyboardType: TextInputType.multiline,
-                  decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Color.fromRGBO(250, 250, 250, 1),
-                      hintText: '내용',
-                      focusedBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none),
-                  controller: _textEditingController,
-                  onChanged: (text) {
-                    setState(() {
-                      this.contents = text;
-                    });
+            ),
+            SetText(contents: '이미지 첨부'),
+            ImageUploader(onChanged: (value) {
+              setState(() {
+                this.imageList = value;
+              });
+            }),
+
+            /* 신고하기 Button */
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 30),
+                child: ElevatedButton(
+                  onPressed: () async {
+                    /* 서버 통신 */
+                    print(
+                        '제목 : ${title}, 내용 : ${contents}, 이미지 : ${imageList}');
+                    var checkReport = await ds.report(
+                        title, contents, imageList, widget.userId);
+
+                    if (checkReport) {
+                      reloadPage();
+                    }
                   },
-                ),
-
-              ),
-              SetText(contents: '이미지 첨부'),
-              ImageUploader(
-                  onChanged : (value) {
-                    setState(() {
-                      this.imageList = value;
-                    });
-                  }
-              ),
-
-              /* 신고하기 Button */
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 30),
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      /* 서버 통신 */
-                      print('제목 : ${title}, 내용 : ${contents}, 이미지 : ${imageList}' );
-                      var checkReport = await ds.report(title, contents, imageList, widget.userId);
-
-                      if(checkReport){
-                        reloadPage();
-                      }
-                    },
-                    child: Text(
-                      '신고하기',
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromRGBO(53, 95, 148, 1),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                  child: Text(
+                    '신고하기',
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromRGBO(53, 95, 148, 1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
-              )
-
-            ],
-          ),
+              ),
+            )
+          ],
         ),
-        ]);
+      ),
+    ]);
   }
 
-  void reloadPage(){
+  void reloadPage() {
     setState(() {
       _textEditingController.text = '';
       _textEditingController2.text = '';
@@ -124,9 +122,7 @@ class _ReportScreenState extends State<ReportScreen> {
     _textEditingController2.dispose();
     super.dispose();
   }
-
 }
-
 
 class SetText extends StatelessWidget {
   const SetText({required this.contents, Key? key}) : super(key: key);
@@ -227,18 +223,18 @@ class _ImageUploaderState extends State<ImageUploader> {
       _pickedImgs.length <= 4
           ? Container()
           : FittedBox(
-          child: Container(
-              padding: EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.6),
-                  shape: BoxShape.circle),
-              child: Text(
-                '+${(_pickedImgs.length - 4).toString()}',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleSmall
-                    ?.copyWith(fontWeight: FontWeight.w800),
-              ))),
+              child: Container(
+                  padding: EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.6),
+                      shape: BoxShape.circle),
+                  child: Text(
+                    '+${(_pickedImgs.length - 4).toString()}',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w800),
+                  ))),
     ];
 
     return GridView.count(
@@ -249,15 +245,15 @@ class _ImageUploaderState extends State<ImageUploader> {
       crossAxisSpacing: 5,
       children: List.generate(
           4,
-              (index) => DottedBorder(
+          (index) => DottedBorder(
               child: Container(
                 child: Center(child: _boxContents[index]),
                 decoration: index <= _pickedImgs.length - 1
                     ? BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: FileImage(File(_pickedImgs[index].path))))
+                        borderRadius: BorderRadius.circular(8),
+                        image: DecorationImage(
+                            fit: BoxFit.cover,
+                            image: FileImage(File(_pickedImgs[index].path))))
                     : null,
               ),
               color: Colors.grey,

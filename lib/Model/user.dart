@@ -1,12 +1,12 @@
 //String id, String pass, String s_number, String s_name
 
 class User {
-  String? studentName;
-  bool? status;
+  String studentName;
+  bool status;
 
   User({
-    this.studentName,
-    this.status,
+    required this.studentName,
+    required this.status,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {

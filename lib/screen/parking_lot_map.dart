@@ -113,6 +113,7 @@ class _ParkingMapState extends State<ParkingMap> {
                   //정보 다 불러와지면 주차장 맵 생성
                   child: nowParkingList.length == 1
                       ? Container(
+                          height: MediaQuery.of(context).size.height * 0.7,
                           child: const Center(
                               child:
                                   CircularProgressIndicator())) // 데이터 로딩 중 표시

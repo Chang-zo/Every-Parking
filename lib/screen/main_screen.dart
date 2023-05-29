@@ -3,6 +3,7 @@ import 'package:every_parking/screen/home_screen.dart';
 import 'package:every_parking/screen/my_page_screen.dart';
 import 'package:every_parking/screen/notice_screen.dart';
 import 'package:every_parking/screen/report_screen.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:bottom_indicator_bar_svg/bottom_indicator_bar_svg.dart';
@@ -55,11 +56,13 @@ class _MainScreenState extends State<MainScreen> {
             userId: widget.userId,
           ),
           //NoticeScreen(),
-          MyPageScreen()
+          MyPageScreen(userId: widget.userId),
         ],
       ),
       bottomNavigationBar: BottomIndicatorBar(
         onTap: (index) {
+          FocusScope.of(context).unfocus();
+          SystemChannels.textInput.invokeMethod('TextInput.hide');
           setState(() {
             _selectedIndex = index;
           });

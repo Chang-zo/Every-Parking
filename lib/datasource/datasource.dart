@@ -92,7 +92,8 @@ class Datasource {
     print(response.statusCode);
     if (response.statusCode == 200) {
       print("내 주차 정보 받아오기 성공");
-      return MyParkingStatus.fromJson(json.decode(response.body));
+      return MyParkingStatus.fromJson(
+          json.decode(utf8.decode(response.bodyBytes)));
     } else {
       print("내 주차 정보 받아오기 실패");
       throw Exception('내 주차 정보 받기 실패');
@@ -193,7 +194,8 @@ class Datasource {
   }
 
   /* 이미지 바이트 신고 내용 서버 전송 */
-  Future<bool> report(String title, String contents,List<XFile> imageList, String userId) async {
+  Future<bool> report(String title, String contents, List<XFile> imageList,
+      String userId) async {
     print('$userId ');
     var request = http.MultipartRequest(
       'POST',
@@ -201,8 +203,6 @@ class Datasource {
     );
     /* header에 유저 id 포함해서 전송 */
     request.headers['userId'] = userId.toString();
-
-
 
     request.fields['title'] = title;
     request.fields['contents'] = contents;

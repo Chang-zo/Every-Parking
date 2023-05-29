@@ -81,6 +81,26 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
                 ],
               );
             });
+      } else {
+        print("반납실패");
+        showDialog(
+            context: context,
+            barrierDismissible: true, // 바깥 영역 터치시 닫을지 여부
+            builder: (BuildContext context) {
+              return AlertDialog(
+                content: const Text("반납에 실패하였습니다."),
+                insetPadding: const EdgeInsets.fromLTRB(0, 80, 0, 80),
+                actions: [
+                  TextButton(
+                    child: const Text('확인'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            });
       }
     } catch (e) {
       showDialog(

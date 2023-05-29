@@ -1,6 +1,7 @@
 import 'package:every_parking/datasource/datasource.dart';
 import 'package:every_parking/screen/registration_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -24,6 +25,7 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
   var isChecked = [false, false, false, false];
   var datasource = new Datasource();
 
+  static final storage = FlutterSecureStorage();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -187,6 +189,7 @@ class _SignUpUserScreen extends State<SignUpUserScreen> {
                                                           0x7a, 0xa6))),
                                           child: const Text("가입"),
                                           onPressed: () async {
+                                            //빈 항목 확인
                                             if (id == "" ||
                                                 email == "" ||
                                                 pass == "" ||
