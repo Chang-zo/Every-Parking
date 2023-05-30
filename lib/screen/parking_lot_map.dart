@@ -247,6 +247,8 @@ class _ParkingCellState extends State<ParkingCell> {
       bool result = await Datasource().parkingLotRent(id, parkingLotId);
       if (result) {
         print("주차 성공!!!!");
+
+        print(parkingLotId);
         showDialog(
             context: context,
             barrierDismissible: true, // 바깥 영역 터치시 닫을지 여부
@@ -258,6 +260,8 @@ class _ParkingCellState extends State<ParkingCell> {
                   TextButton(
                     child: const Text('확인'),
                     onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.pop(context);
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
@@ -326,10 +330,29 @@ class _ParkingCellState extends State<ParkingCell> {
     }
   }
 
+  dynamic carInfo = "";
+  int myParkingId = 0;
+  Future<void> getMyParkingId() async {
+    //savedTime 위치에 주차 등록 시간 입력하면 끝!
+    carInfo = await storage.read(key: 'myParkingLot');
+    if (carInfo != null) {
+      var parsedJson = json.decode(carInfo);
+      int parkId = parsedJson['parkId'];
+
+      setState(() {
+        myParkingId = parkId;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
+        await getMyParkingId();
+        print("GestureDetector onTap 내부");
+        print(parkId);
+        print(myParkingId);
         if (nowParkingList[parkId].parkingStatus == "AVAILABLE") {
           showDialog(
             context: context,
@@ -354,11 +377,43 @@ class _ParkingCellState extends State<ParkingCell> {
               );
             },
           );
-        } else {
+        } else if (parkId == myParkingId) {
           showDialog(
               context: context,
               builder: (context) =>
                   MyParkingInfo("$parkingName번", widget.userId, parkId));
+        } else {
+          showDialog(
+              context: context,
+              barrierDismissible: true, // 바깥 영역 터치시 닫을지 여부
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  content: const Text("해당 사용자가 문제를 일으켰나요?"),
+                  insetPadding: const EdgeInsets.fromLTRB(0, 80, 0, 80),
+                  actions: [
+                    TextButton(
+                      child: const Text('신고'),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MainScreen(
+                                      userId: widget.userId,
+                                      index: 1,
+                                    )));
+                      },
+                    ),
+                    TextButton(
+                      child: const Text('취소'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              });
         }
       },
       child: Container(

@@ -11,6 +11,7 @@ import 'package:every_parking/screen/my_parking_status.dart';
 
 import '../Model/parkingLotInfo.dart';
 import '../Model/parkingstatus.dart';
+import 'main_screen.dart';
 
 //로그인 후 보이는 첫화면
 class HomeScreen extends StatefulWidget {
@@ -170,14 +171,16 @@ class _HomeScreen extends State<HomeScreen> {
   /*주차장 상태 가져오기*/
   Future<void> _getParkingLotInfo() async {
     ParkingLotInfo nowParkingStatusInfo = await ds.nowParking(widget.userId);
-    List<ParkingLotInfo> newParkingList = [];
+    List<ParkingLotInfo> newParkingList = [
+      ParkingLotInfo(name: "동문주차장", used: 65, total: 106)
+    ];
     newParkingList.add(nowParkingStatusInfo);
 
     print(
         'home/ ${nowParkingStatusInfo.total},${nowParkingStatusInfo.used},${nowParkingStatusInfo.name}');
 
     setState(() {
-      nowParkingList.addAll(newParkingList);
+      nowParkingList = newParkingList;
     });
   }
 
@@ -267,10 +270,21 @@ class _HomeScreen extends State<HomeScreen> {
     });
   }
 
-  void timeExtension() {
+  Future<void> timeExtension() async {
     setState(() {
-      i = 180;
+      i = 179;
     });
+    var val = json.encode({
+      'parkId': myParkingStatus.parkingId,
+      'startTime': DateTime.now().toIso8601String()
+    });
+    print(val);
+
+    print("주차 정보 로컬에 저장하기");
+    await storage.write(
+      key: 'myParkingLot',
+      value: val,
+    );
   }
 
   Text _reMain() {
@@ -602,7 +616,54 @@ class _HomeScreen extends State<HomeScreen> {
                                                   ),
                                                 ),
                                                 onPressed: () {
-                                                  timeExtension();
+                                                  showDialog(
+                                                      context: context,
+                                                      barrierDismissible:
+                                                          true, // 바깥 영역 터치시 닫을지 여부
+                                                      builder: (BuildContext
+                                                          context) {
+                                                        return AlertDialog(
+                                                          content: const Text(
+                                                              "시간을 연장하시겠습니까?"),
+                                                          insetPadding:
+                                                              const EdgeInsets
+                                                                      .fromLTRB(
+                                                                  0, 80, 0, 80),
+                                                          actions: [
+                                                            TextButton(
+                                                              child: const Text(
+                                                                  '확인'),
+                                                              onPressed: () {
+                                                                timeExtension();
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop();
+                                                                Navigator
+                                                                    .pushReplacement(
+                                                                  context,
+                                                                  MaterialPageRoute(
+                                                                      builder:
+                                                                          (context) =>
+                                                                              MainScreen(
+                                                                                userId: widget.userId,
+                                                                                index: 0,
+                                                                              )),
+                                                                );
+                                                              },
+                                                            ),
+                                                            TextButton(
+                                                              child: const Text(
+                                                                  '취소'),
+                                                              onPressed: () {
+                                                                timeExtension();
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop();
+                                                              },
+                                                            ),
+                                                          ],
+                                                        );
+                                                      });
                                                 },
                                                 child: Row(
                                                   mainAxisAlignment:
@@ -613,6 +674,7 @@ class _HomeScreen extends State<HomeScreen> {
                                                       'assets/icons/white/custom.plus.app.svg',
                                                       width: 20,
                                                       height: 20,
+                                                      color: Colors.white,
                                                     ),
                                                     Text("시간연장")
                                                   ],
@@ -647,6 +709,7 @@ class _HomeScreen extends State<HomeScreen> {
                                                       'assets/icons/white/custom.return.right.svg',
                                                       width: 20,
                                                       height: 20,
+                                                      color: Colors.white,
                                                     ),
                                                     Text("반납")
                                                   ],

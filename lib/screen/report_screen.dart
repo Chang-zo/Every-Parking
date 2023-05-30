@@ -7,6 +7,8 @@ import 'package:image_picker/image_picker.dart';
 import '../datasource/datasource.dart';
 import 'package:adaptive_action_sheet/adaptive_action_sheet.dart';
 
+import 'main_screen.dart';
+
 class ReportScreen extends StatefulWidget {
   final String userId;
   const ReportScreen({Key? key, required this.userId}) : super(key: key);
@@ -87,6 +89,32 @@ class _ReportScreenState extends State<ReportScreen> {
                         title, contents, imageList, widget.userId);
 
                     if (checkReport) {
+                      showDialog(
+                          context: context,
+                          barrierDismissible: true, // 바깥 영역 터치시 닫을지 여부
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              content: const Text("신고가 접수되었습니다."),
+                              insetPadding:
+                                  const EdgeInsets.fromLTRB(0, 80, 0, 80),
+                              actions: [
+                                TextButton(
+                                  child: const Text('확인'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => MainScreen(
+                                                userId: widget.userId,
+                                                index: 0,
+                                              )),
+                                    );
+                                  },
+                                ),
+                              ],
+                            );
+                          });
                       reloadPage();
                     }
                   },
@@ -196,14 +224,14 @@ class _ImageUploaderState extends State<ImageUploader> {
                   onPressed: (_) {
                     _pickImg();
                     Navigator.pop(context);
-                    },
+                  },
                 ),
                 BottomSheetAction(
                   title: const Text('사진 촬영'),
                   onPressed: (_) {
                     _cameraImg();
                     Navigator.pop(context);
-                    },
+                  },
                 ),
               ],
               cancelAction: CancelAction(title: const Text('Cancel')),

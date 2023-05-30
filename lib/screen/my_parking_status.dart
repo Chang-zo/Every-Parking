@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:every_parking/datasource/datasource.dart';
 import 'package:every_parking/screen/main_screen.dart';
+import 'package:every_parking/screen/parking_lot_map.dart';
 import 'package:every_parking/screen/report_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -23,7 +24,6 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
   static final storage = FlutterSecureStorage();
   dynamic parkingInfo = '';
   int myParkingId = 0;
-  bool isMe = false;
 
   int time_h = 0;
   int time_m = 0;
@@ -32,33 +32,7 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
   void initState() {
     print("MyParkingInfo의 initState 실행");
     super.initState();
-    myParkingInfo();
-    getRemainTime();
-  }
-
-  Future<void> myParkingInfo() async {
-    parkingInfo = await storage.read(key: 'myParkingLot');
-    if (parkingInfo != null) {
-      print('주차등록 정보가 존재합니다.');
-      var parsedJson = json.decode(parkingInfo);
-      myParkingId = parsedJson['parkId'];
-    } else {
-      print('주차정보가 없습니다.');
-      myParkingId = 0;
-    }
-    print("로컬에 등록된 주차정보");
-    print(myParkingId);
-    print(widget.parkingId);
-    print(myParkingId == widget.parkingId);
-    if (myParkingId == widget.parkingId) {
-      setState(() {
-        isMe = true;
-      });
-    } else {
-      setState(() {
-        isMe = false;
-      });
-    }
+    getCarRemainTime();
   }
 
   Future<void> parkingReturn(userId, parkingId) async {
@@ -84,6 +58,15 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
                       Navigator.of(context).pop();
                       Navigator.of(context).pop();
                       Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => MainScreen(
+                                  userId: widget.userId,
+                                  index: 0,
+                                )),
+                      );
                     },
                   ),
                 ],
@@ -132,11 +115,16 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
     }
   }
 
+  dynamic carInfo = "";
   //서버로부터 시간 정보 받아와지면 수정할것
   int i = 10;
-  void getRemainTime() {
+  Future<void> getMyCarRemainTime() async {
     //savedTime 위치에 주차 등록 시간 입력하면 끝!
-    DateTime savedTime = DateTime(2023, 5, 30, 0, 0, 0, 0);
+    carInfo = await storage.read(key: 'myParkingLot');
+    var parsedJson = json.decode(carInfo);
+    String startTimeString = parsedJson['startTime'];
+    DateTime savedTime = DateTime.parse(startTimeString);
+    //DateTime savedTime = DateTime(2023, 5, 30, 0, 0, 0, 0);
     int remain = 179 -
         DateTime.now()
             .difference(savedTime)
@@ -147,8 +135,49 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
     time_m = i % 60;
   }
 
+  Future<void> getCarRemainTime() async {
+    //savedTime 위치에 주차 등록 시간 입력하면 끝!
+    carInfo = await storage.read(key: 'myParkingLot');
+    if (carInfo != null) {
+      var parsedJson = json.decode(carInfo);
+      String startTimeString = parsedJson['startTime'];
+      DateTime savedTime = DateTime.parse(startTimeString);
+      //DateTime savedTime = DateTime(2023, 5, 30, 0, 0, 0, 0);
+      int remain = 179 -
+          DateTime.now()
+              .difference(savedTime)
+              .inMinutes; // 180분 - (주차 시작시간 - 현재시간)
+      i = remain;
+
+      setState(() {
+        time_h = i ~/ 60;
+        time_m = i % 60;
+      });
+
+      print(time_h);
+      print(time_m);
+    }
+  }
+
   Text _reMain() {
     return Text("${time_h.toString()}시간\n${time_m.toString()}분");
+  }
+
+  Future<void> timeExtension() async {
+    setState(() {
+      i = 179;
+    });
+    var val = json.encode({
+      'parkId': widget.parkingId,
+      'startTime': DateTime.now().toIso8601String()
+    });
+    print(val);
+
+    print("주차 정보 로컬에 저장하기");
+    await storage.write(
+      key: 'myParkingLot',
+      value: val,
+    );
   }
 
   @override
@@ -210,14 +239,14 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                Text(
+                                const Text(
                                   "잔여시간",
                                   style: TextStyle(
                                     fontSize: 20,
                                     color: Colors.black,
                                   ),
                                 ),
-                                VerticalDivider(
+                                const VerticalDivider(
                                   color: Colors.grey,
                                   thickness: 1,
                                   width: 20,
@@ -230,86 +259,154 @@ class _MyParkingInfoState extends State<MyParkingInfo> {
                           ),
                         ),
                       ),
-                      isMe == true
-                          ? ButtonBar(
-                              alignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                SizedBox(
-                                  width: 150,
-                                  height: 40,
-                                  child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Color.fromARGB(
-                                            0xFF, 0x2F, 0x64, 0x96),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(15.0),
-                                        ),
-                                      ),
-                                      onPressed: () async {
-                                        parkingReturn(
-                                            widget.userId, myParkingId);
-                                      },
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceAround,
-                                        children: [
-                                          SvgPicture.asset(
-                                            'assets/icons/white/custom.return.right.svg',
-                                            width: 20,
-                                            height: 20,
-                                          ),
-                                          Text(
-                                            "반납",
-                                            style: TextStyle(fontSize: 15),
-                                          )
-                                        ],
-                                      )),
+                      ButtonBar(
+                        alignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          SizedBox(
+                            width: 150,
+                            height: 35,
+                            child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      Color.fromARGB(0xFF, 0x2F, 0x64, 0x96),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30.0),
+                                  ),
                                 ),
-                              ],
-                            )
-                          : ButtonBar(
-                              alignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                SizedBox(
-                                  width: 150,
-                                  height: 40,
-                                  child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Color.fromARGB(
-                                            0xFF, 0x2F, 0x64, 0x96),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(15.0),
-                                        ),
-                                      ),
-                                      onPressed: () {
-                                        Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => MainScreen(
-                                                  userId: widget.userId,
-                                                  index: 1)),
+                                onPressed: () {
+                                  showDialog(
+                                      context: context,
+                                      barrierDismissible:
+                                          true, // 바깥 영역 터치시 닫을지 여부
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          content: const Text("시간을 연장하시겠습니까?"),
+                                          insetPadding:
+                                              const EdgeInsets.fromLTRB(
+                                                  0, 80, 0, 80),
+                                          actions: [
+                                            TextButton(
+                                              child: const Text('확인'),
+                                              onPressed: () {
+                                                timeExtension();
+                                                Navigator.of(context).pop();
+                                                Navigator.of(context).pop();
+                                                Navigator.of(context).pop();
+                                                Navigator.pushReplacement(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          MainScreen(
+                                                            userId:
+                                                                widget.userId,
+                                                            index: 0,
+                                                          )),
+                                                );
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          ParkingMap(
+                                                            "테스트",
+                                                            widget.userId,
+                                                          )),
+                                                );
+                                                showDialog(
+                                                    context: context,
+                                                    builder: (context) =>
+                                                        MyParkingInfo(
+                                                            widget.parkingNum,
+                                                            widget.userId,
+                                                            widget.parkingId));
+                                              },
+                                            ),
+                                            TextButton(
+                                              child: const Text('취소'),
+                                              onPressed: () {
+                                                timeExtension();
+                                                Navigator.of(context).pop();
+                                              },
+                                            ),
+                                          ],
                                         );
-                                      },
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceAround,
-                                        children: [
-                                          SvgPicture.asset(
-                                            'assets/icons/white/custom.return.right.svg',
-                                            width: 20,
-                                            height: 20,
-                                          ),
-                                          Text("사용자 신고")
-                                        ],
-                                      )),
+                                      });
+                                },
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    SvgPicture.asset(
+                                      'assets/icons/white/custom.plus.app.svg',
+                                      width: 20,
+                                      height: 20,
+                                      color: Colors.white,
+                                    ),
+                                    Text("시간연장")
+                                  ],
+                                )),
+                          ),
+                          SizedBox(
+                            width: 150,
+                            height: 40,
+                            child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      Color.fromARGB(0xFF, 0x2F, 0x64, 0x96),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15.0),
+                                  ),
                                 ),
-                              ],
-                            )
+                                onPressed: () async {
+                                  showDialog(
+                                      context: context,
+                                      barrierDismissible:
+                                          true, // 바깥 영역 터치시 닫을지 여부
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          content: const Text("반납하시겠습니까?"),
+                                          insetPadding:
+                                              const EdgeInsets.fromLTRB(
+                                                  0, 80, 0, 80),
+                                          actions: [
+                                            TextButton(
+                                              child: const Text('확인'),
+                                              onPressed: () {
+                                                parkingReturn(
+                                                    widget.userId, myParkingId);
+                                              },
+                                            ),
+                                            TextButton(
+                                              child: const Text('취소'),
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                            ),
+                                          ],
+                                        );
+                                      });
+                                },
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    SvgPicture.asset(
+                                      'assets/icons/white/custom.return.right.svg',
+                                      width: 20,
+                                      height: 20,
+                                      color: Colors.white,
+                                    ),
+                                    Text(
+                                      "반납",
+                                      style: TextStyle(fontSize: 15),
+                                    )
+                                  ],
+                                )),
+                          ),
+                        ],
+                      )
                     ],
                   ),
-                ),
+                )
               ],
             ),
           )
